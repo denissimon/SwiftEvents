@@ -18,9 +18,17 @@ In comparison with Cocoa mechanisms, SwiftEvents:
 Installation
 ------------
 
+#### CocoaPods
+
+To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
+
+```ruby
+pod 'SwiftEvents'
+```
+
 #### Swift Package Manager
 
-To install the library using the [Swift Package Manager](https://swift.org/package-manager), add it to your `Package.swift` file:
+To install SwiftEvents using the [Swift Package Manager](https://swift.org/package-manager), add it to your `Package.swift` file:
 
 ```swift
 dependencies: [
