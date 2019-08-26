@@ -43,8 +43,6 @@ If you prefer not to use dependency managers, you can integrate SwiftEvents into
 Usage
 -----
 
-This section is under development.
-
 License
 -------
 
