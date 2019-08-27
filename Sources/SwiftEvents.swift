@@ -17,6 +17,7 @@ public class Event<T> {
     public init() {}
     
     /// Adds a new event listener.
+    ///
     /// - handler: The closure you want executed when the event triggers.
     func addListener<U: AnyObject>(_ target: U, handler: @escaping (U) -> (T) -> ()) {
         let wrapper = Wrapper(target: target, handler: handler)
@@ -30,8 +31,24 @@ public class Event<T> {
         }
     }
     
+    /// Removes a specific listener from the Event's listeners.
+    ///
+    /// - target: The target object that listens to the Event.
+    func removeListener(target: AnyObject) {
+        let listenerId = ObjectIdentifier(target)
+        listeners = listeners.filter { $0.getId() != listenerId }
+    }
+    
+    /// Removes a specific listener from the Event's listeners.
+    ///
+    /// - id: The id of the listener.
+    private func removeListener(id: ObjectIdentifier?) {
+        guard id != nil else { return }
+        listeners = listeners.filter { $0.getId() != id! }
+    }
+    
     /// Removes all listeners on this instance.
-    func removeListeners() {
+    func removeAllListeners() {
         self.listeners.removeAll()
     }
 }
