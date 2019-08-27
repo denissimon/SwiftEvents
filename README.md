@@ -1,7 +1,7 @@
 SwiftEvents
 ===========
 
-SwiftEvents is a lightweight, pure-Swift alternative to Cocoa KVO and NotificationCenter.
+SwiftEvents is a lightweight, pure-Swift alternative to Cocoa KVO, NotificationCenter and Delegation.
 
 One of the bright examples of using SwiftEvents is MVVM, as it provides an easier way for the View to react to changes in the ViewModel.
 
