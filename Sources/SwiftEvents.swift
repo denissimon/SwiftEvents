@@ -12,22 +12,32 @@ import Foundation
 /// A type-safe Event with built-in security.
 public class Event<T> {
     
-    private var listeners = [ListenerWrapper]()
+    private var listeners = [EventSubscription<T>]()
     
     public init() {}
     
-    /// Adds a new event listener.
+    /// Adds a new Event listener.
     ///
-    /// - handler: The closure you want executed when the event triggers.
-    func addListener<U: AnyObject>(_ target: U, handler: @escaping (U) -> (T) -> ()) {
-        let wrapper = Wrapper(target: target, handler: handler)
+    /// - target: The target object that listens to the Event.
+    /// - handler: The closure you want executed when the Event triggers.
+    func addListener<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
+        let magicHandler: (T) -> () = { [weak target] data in
+            if let target = target {
+                handler(target, data)
+            }
+        }
+        let wrapper = EventSubscription(target: target, handler: magicHandler)
         listeners.append(wrapper)
     }
     
-    /// Triggers the event, calls all handlers.
+    /// Triggers the Event, calls all handlers.
+    ///
+    /// - data: The data to trigger the Event with.
     func trigger(data: T) {
         for listener in listeners {
-            listener.rise(data: data)
+            if listener.target != nil {
+                listener.handler(data)
+            }
         }
     }
     
@@ -53,29 +63,16 @@ public class Event<T> {
     }
 }
 
-private protocol ListenerWrapper {
-    func rise(data: Any)
-    func getId() -> ObjectIdentifier?
-}
-
-private struct Wrapper<T: AnyObject, U>: ListenerWrapper {
-    weak var target: T?
-    let handler: (T) -> (U) -> ()
-    
+/// Wrapper that contains information related to a subscription: target, handler, id.
+private struct EventSubscription<T> {
+    weak var target: AnyObject?
+    var handler: (T) -> ()
     private var id: ObjectIdentifier?
     
-    init(target: T?, handler: @escaping (T) -> (U) -> ()) {
+    init(target: AnyObject, handler: @escaping (T) -> ()) {
         self.target = target
         self.handler = handler
-        if target != nil {
-            self.id = ObjectIdentifier(target!)
-        }
-    }
-    
-    func rise(data: Any) {
-        if let target = target {
-            handler(target)(data as! U)
-        }
+        self.id = ObjectIdentifier(target)
     }
     
     func getId() -> ObjectIdentifier? {
