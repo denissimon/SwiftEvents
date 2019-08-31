@@ -10,7 +10,7 @@
 import Foundation
 
 /// A type-safe Event with built-in security.
-public class Event<T> {
+final public class Event<T> {
     
     private var listeners = [EventSubscription<T>]()
     
@@ -43,18 +43,18 @@ public class Event<T> {
     
     /// Removes a specific listener from the Event's listeners.
     ///
-    /// - target: The target object that listens to the Event.
-    func removeListener(target: AnyObject) {
-        let listenerId = ObjectIdentifier(target)
-        listeners = listeners.filter { $0.getId() != listenerId }
-    }
-    
-    /// Removes a specific listener from the Event's listeners.
-    ///
     /// - id: The id of the listener.
     private func removeListener(id: ObjectIdentifier?) {
         guard id != nil else { return }
         listeners = listeners.filter { $0.getId() != id! }
+    }
+    
+    /// Removes a specific listener from the Event's listeners.
+    ///
+    /// - target: The target object that listens to the Event.
+    func removeListener(target: AnyObject) {
+        let listenerId = ObjectIdentifier(target)
+        listeners = listeners.filter { $0.getId() != listenerId }
     }
     
     /// Removes all listeners on this instance.
