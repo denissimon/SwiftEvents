@@ -59,7 +59,7 @@ final public class Event<T> {
     
     /// Removes all listeners on this instance.
     func removeAllListeners() {
-        self.listeners.removeAll()
+        listeners.removeAll()
     }
 }
 
