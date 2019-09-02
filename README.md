@@ -1,19 +1,19 @@
 SwiftEvents
 ===========
 
-SwiftEvents is a lightweight, pure-Swift alternative to Cocoa KVO, NotificationCenter and Delegation.
+**SwiftEvents** is a lightweight, pure-Swift library for implementing events in iOS, macOS, watchOS, tvOS and Linux. It has `NotificationCenter`, `Delegation` and `KVO` functionality in one simple, **not verbose** and **type-safe API**. In particular, MVVM is one of the bright examples when SwiftEvents can be the easiest and fastest way for the View to react to changes in the ViewModel. 
 
-One of the bright examples of using SwiftEvents is MVVM, as it provides an easier way for the View to react to changes in the ViewModel.
+Along with this, the library has a built-in solution for preventing retain cycles (no need to specify `[weak self]`!), in order to be **always secure** from memory leaks. It also automatically removes listeners when they are deallocated, so you don't need to explicitly manage this.
 
-In comparison with Cocoa mechanisms, SwiftEvents:
+In comparison with Cocoa mechanisms, SwiftEvents as well:
 
 * Uses native Swift syntax: closures, generics and didSet property observers
 
-* Provides the ability to observe properties in a class or a struct
+* Provides the ability to observe properties in any class or any struct
 
-* Provides the ability to observe all of the properties of an instance with minimal effort
+* Provides the ability to observe all of the properties of an instance without significant efforts
 
-* Easier to test, maintain and debug
+* Easier to test, maintain and debug. And much more.
 
 Installation
 ------------
@@ -38,7 +38,7 @@ dependencies: [
 
 #### Manual
 
-If you prefer not to use dependency managers, you can integrate SwiftEvents into your project manually.
+Drag the `Sources` folder anywhere in your project.
 
 Usage
 -----
