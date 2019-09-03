@@ -14,6 +14,9 @@ final public class Event<T> {
     
     private var listeners = [EventSubscription<T>]()
     
+    /// The number of times the Event has triggered.
+    public private(set) var triggerCount = Int()
+    
     public init() {}
     
     /// Adds a new Event listener.
@@ -35,6 +38,8 @@ final public class Event<T> {
     ///
     /// - data: The data to trigger the Event with.
     func trigger(data: T) {
+        triggerCount += 1
+        
         for listener in listeners {
             if listener.target != nil {
                 listener.handler(data)
