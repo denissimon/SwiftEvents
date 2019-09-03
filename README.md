@@ -1,19 +1,25 @@
 SwiftEvents
 ===========
 
-**SwiftEvents** is a lightweight, pure-Swift library for implementing events in iOS, macOS, watchOS, tvOS and Linux. It has `NotificationCenter`, `Delegation` and `KVO` functionality in one simple, **not verbose** and **type-safe API**. In particular, MVVM is one of the bright examples when SwiftEvents can be the easiest and fastest way for the View to react to changes in the ViewModel. 
+**SwiftEvents** is a lightweight, pure-Swift library for implementing events in iOS, macOS, watchOS, tvOS and Linux. It has `NotificationCenter` (multiple listeners to the event), `Delegation` (one listener to the event) and `KVO` (observing properties using the event) functionality in one simple, **not verbose** and **type-safe API**. 
 
-Along with this, the library has a built-in solution for preventing retain cycles (no need to specify `[weak self]`!), in order to be **always secure** from memory leaks. It also automatically removes listeners when they are deallocated, so you don't need to explicitly manage this.
+The purpose of SwiftEvents is to simplify and improve the communication between components in a modern Swift project.
 
-In comparison with Cocoa mechanisms, SwiftEvents as well:
+In comparison with Cocoa mechanisms, SwiftEvents has the following features:
 
-* Uses native Swift syntax: closures, generics and didSet property observers
+- [x] Type-safety
 
-* Provides the ability to observe properties in any class or any struct
+- [x] Built-in solution for preventing retain cycles (no need to specify `[weak self]`!), in order to **always be protected** from memory leaks
 
-* Provides the ability to observe all of the properties of an instance without significant efforts
+- [ ] Cancelable subscriptions: automatic removal of listeners when they are deallocated, so you don't need to explicitly manage this
 
-* Easier to test, maintain and debug. And much more.
+- [ ] Thread-safety: listeners can be registered on a different thread than notifications are sent on
+
+- [ ] Delayed and one-time sending notifications
+
+- [ ] Ability to observe properties in any class or any struct
+
+- [ ] Easier to test, maintain and debug
 
 Installation
 ------------
