@@ -11,7 +11,7 @@ In comparison with Cocoa mechanisms, SwiftEvents has the following features:
 
 - [x] Built-in solution for preventing retain cycles (no need to specify `[weak self]`!), in order to **always be protected** from memory leaks
 
-- [ ] Cancelable subscriptions: automatic removal of listeners when they are deallocated, so you don't need to explicitly manage this
+- [x] Cancelable subscriptions: automatic removal of listeners when they are deallocated, so you don't need to explicitly manage this
 
 - [ ] Thread-safety: listeners can be registered on a different thread than notifications are sent on
 

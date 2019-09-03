@@ -18,7 +18,8 @@ final public class Event<T> {
     
     /// Adds a new Event listener.
     ///
-    /// - target: The target object that listens to the Event.
+    /// - target: The target object that listens to the Event. If the target object is
+    ///   deallocated, it is automatically removed from the Event listeners.
     /// - handler: The closure you want executed when the Event triggers.
     func addListener<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
         let magicHandler: (T) -> () = { [weak target] data in
@@ -37,11 +38,14 @@ final public class Event<T> {
         for listener in listeners {
             if listener.target != nil {
                 listener.handler(data)
+            } else {
+                // Removes the listener when it is deallocated.
+                removeListener(id: listener.getId())
             }
         }
     }
     
-    /// Removes a specific listener from the Event's listeners.
+    /// Removes a specific listener from the Event listeners.
     ///
     /// - id: The id of the listener.
     private func removeListener(id: ObjectIdentifier?) {
@@ -49,7 +53,7 @@ final public class Event<T> {
         listeners = listeners.filter { $0.getId() != id! }
     }
     
-    /// Removes a specific listener from the Event's listeners.
+    /// Removes a specific listener from the Event listeners.
     ///
     /// - target: The target object that listens to the Event.
     func removeListener(target: AnyObject) {
