@@ -88,3 +88,18 @@ private struct EventSubscription<T> {
         return id
     }
 }
+
+/// KVO functionality
+final class Observable<T> {
+    let didChanged = Event<(T, T)>()
+    
+    var value: T {
+        didSet {
+            didChanged.trigger(data: (value, oldValue))
+        }
+    }
+    
+    init(_ v: T) {
+        value = v
+    }
+}

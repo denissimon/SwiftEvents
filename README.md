@@ -17,7 +17,7 @@ In comparison with Cocoa mechanisms, SwiftEvents has the following features:
 
 - [ ] Delayed and one-time sending notifications
 
-- [ ] Ability to observe properties in any class or any struct
+- [x] Ability to observe properties in any class or struct
 
 - [ ] Easier to test, maintain and debug
 
