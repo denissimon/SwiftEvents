@@ -103,3 +103,9 @@ final class Observable<T> {
         value = v
     }
 }
+
+/// Helper operator to trigger Event data.
+infix operator <<
+func << <T> (left: Observable<T>?, right: @autoclosure () -> T) {
+    left?.value = right()
+}
