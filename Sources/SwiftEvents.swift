@@ -45,7 +45,7 @@ final public class Event<T> {
                 listener.handler(data)
             } else {
                 // Removes the listener when it is deallocated.
-                removeListener(id: listener.getId())
+                removeListener(id: listener.id)
             }
         }
     }
@@ -55,15 +55,15 @@ final public class Event<T> {
     /// - id: The id of the listener.
     private func removeListener(id: ObjectIdentifier?) {
         guard id != nil else { return }
-        listeners = listeners.filter { $0.getId() != id! }
+        listeners = listeners.filter { $0.id != id! }
     }
     
     /// Removes a specific listener from the Event listeners.
     ///
     /// - target: The target object that listens to the Event.
     func removeListener(target: AnyObject) {
-        let listenerId = ObjectIdentifier(target)
-        listeners = listeners.filter { $0.getId() != listenerId }
+        let id = ObjectIdentifier(target)
+        listeners = listeners.filter { $0.id != id }
     }
     
     /// Removes all listeners on this instance.
@@ -72,20 +72,16 @@ final public class Event<T> {
     }
 }
 
-/// Wrapper that contains information related to a subscription: target, handler, id.
+/// Wrapper that contains information related to a subscription.
 private struct EventSubscription<T> {
     weak var target: AnyObject?
     var handler: (T) -> ()
-    private var id: ObjectIdentifier?
+    public private(set) var id: ObjectIdentifier?
     
     init(target: AnyObject, handler: @escaping (T) -> ()) {
         self.target = target
         self.handler = handler
         self.id = ObjectIdentifier(target)
-    }
-    
-    func getId() -> ObjectIdentifier? {
-        return id
     }
 }
 
