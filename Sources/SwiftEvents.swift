@@ -21,10 +21,10 @@ final public class Event<T> {
     
     /// Adds a new Event listener.
     ///
-    /// - target: The target object that listens to the Event. If the target object is
+    /// - Parameter target: The target object that listens to the Event. If the target object is
     ///   deallocated, it is automatically removed from the Event listeners.
-    /// - handler: The closure you want executed when the Event triggers.
-    func addListener<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
+    /// - Parameter handler: The closure you want executed when the Event triggers.
+    public func addListener<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
         let magicHandler: (T) -> () = { [weak target] data in
             if let target = target {
                 handler(target, data)
@@ -36,8 +36,8 @@ final public class Event<T> {
     
     /// Triggers the Event, calls all handlers.
     ///
-    /// - data: The data to trigger the Event with.
-    func trigger(data: T) {
+    /// - Parameter data: The data to trigger the Event with.
+    public func trigger(data: T) {
         triggerCount += 1
         
         for listener in listeners {
@@ -52,31 +52,29 @@ final public class Event<T> {
     
     /// Removes a specific listener from the Event listeners.
     ///
-    /// - id: The id of the listener.
-    private func removeListener(id: ObjectIdentifier?) {
-        guard id != nil else { return }
-        listeners = listeners.filter { $0.id != id! }
+    /// - Parameter id: The id of the listener.
+    private func removeListener(id: ObjectIdentifier) {
+        listeners = listeners.filter { $0.id != id }
     }
     
     /// Removes a specific listener from the Event listeners.
     ///
-    /// - target: The target object that listens to the Event.
-    func removeListener(target: AnyObject) {
-        let id = ObjectIdentifier(target)
-        listeners = listeners.filter { $0.id != id }
+    /// - Parameter target: The target object that listens to the Event.
+    public func removeListener(target: AnyObject) {
+        removeListener(id: ObjectIdentifier(target))
     }
     
     /// Removes all listeners on this instance.
-    func removeAllListeners() {
+    public func removeAllListeners() {
         listeners.removeAll()
     }
 }
 
 /// Wrapper that contains information related to a subscription.
-private struct EventSubscription<T> {
+fileprivate struct EventSubscription<T> {
     weak var target: AnyObject?
     var handler: (T) -> ()
-    public private(set) var id: ObjectIdentifier?
+    var id: ObjectIdentifier
     
     init(target: AnyObject, handler: @escaping (T) -> ()) {
         self.target = target
@@ -86,22 +84,22 @@ private struct EventSubscription<T> {
 }
 
 /// KVO functionality
-final class Observable<T> {
-    let didChanged = Event<(T, T)>()
+final public class Observable<T> {
+    public let didChanged = Event<(T, T)>()
     
-    var value: T {
+    public var value: T {
         didSet {
             didChanged.trigger(data: (value, oldValue))
         }
     }
     
-    init(_ v: T) {
+    public init(_ v: T) {
         value = v
     }
 }
 
 /// Helper operator to trigger Event data.
-infix operator <<
-func << <T> (left: Observable<T>?, right: @autoclosure () -> T) {
+infix operator <<<
+public func <<< <T> (left: Observable<T>?, right: @autoclosure () -> T) {
     left?.value = right()
 }
