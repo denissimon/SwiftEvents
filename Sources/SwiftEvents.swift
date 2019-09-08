@@ -14,6 +14,10 @@ final public class Event<T> {
     
     private var listeners = [EventSubscription<T>]()
     
+    public var listenersCount: Int {
+        return listeners.count
+    }
+    
     /// The number of times the Event has triggered.
     public private(set) var triggerCount = Int()
     
