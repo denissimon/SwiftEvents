@@ -12,10 +12,10 @@ import Foundation
 /// A type-safe Event with built-in security.
 final public class Event<T> {
     
-    private var listeners = [EventSubscription<T>]()
+    private var subscribers = [EventSubscription<T>]()
     
-    public var listenersCount: Int {
-        return listeners.count
+    public var subscribersCount: Int {
+        return subscribers.count
     }
     
     /// The number of times the Event has triggered.
@@ -23,19 +23,19 @@ final public class Event<T> {
     
     public init() {}
     
-    /// Adds a new Event listener.
+    /// Adds a new Event subscriber.
     ///
-    /// - Parameter target: The target object that listens to the Event. If the target object is
-    ///   deallocated, it is automatically removed from the Event listeners.
+    /// - Parameter target: The target object that subscribes to the Event. If the target object is
+    ///   deallocated, it is automatically removed from the Event subscribers.
     /// - Parameter handler: The closure you want executed when the Event triggers.
-    public func addListener<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
+    public func addSubscriber<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
         let magicHandler: (T) -> () = { [weak target] data in
             if let target = target {
                 handler(target, data)
             }
         }
         let wrapper = EventSubscription(target: target, handler: magicHandler)
-        listeners.append(wrapper)
+        subscribers.append(wrapper)
     }
     
     /// Triggers the Event, calls all handlers.
@@ -44,33 +44,33 @@ final public class Event<T> {
     public func trigger(data: T) {
         triggerCount += 1
         
-        for listener in listeners {
-            if listener.target != nil {
-                listener.handler(data)
+        for subscriber in subscribers {
+            if subscriber.target != nil {
+                subscriber.handler(data)
             } else {
-                // Removes the listener when it is deallocated.
-                removeListener(id: listener.id)
+                // Removes the subscriber when it is deallocated.
+                removeSubscriber(id: subscriber.id)
             }
         }
     }
     
-    /// Removes a specific listener from the Event listeners.
+    /// Removes a specific subscriber from the Event subscribers.
     ///
-    /// - Parameter id: The id of the listener.
-    private func removeListener(id: ObjectIdentifier) {
-        listeners = listeners.filter { $0.id != id }
+    /// - Parameter id: The id of the subscriber.
+    private func removeSubscriber(id: ObjectIdentifier) {
+        subscribers = subscribers.filter { $0.id != id }
     }
     
-    /// Removes a specific listener from the Event listeners.
+    /// Removes a specific subscriber from the Event subscribers.
     ///
-    /// - Parameter target: The target object that listens to the Event.
-    public func removeListener(target: AnyObject) {
-        removeListener(id: ObjectIdentifier(target))
+    /// - Parameter target: The target object that subscribes to the Event.
+    public func removeSubscriber(target: AnyObject) {
+        removeSubscriber(id: ObjectIdentifier(target))
     }
     
-    /// Removes all listeners on this instance.
-    public func removeAllListeners() {
-        listeners.removeAll()
+    /// Removes all subscribers on this instance.
+    public func removeAllSubscribers() {
+        subscribers.removeAll()
     }
 }
 
