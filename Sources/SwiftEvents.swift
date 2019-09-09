@@ -41,7 +41,7 @@ final public class Event<T> {
     /// Triggers the Event, calls all handlers.
     ///
     /// - Parameter data: The data to trigger the Event with.
-    public func trigger(data: T) {
+    public func trigger(_ data: T) {
         triggerCount += 1
         
         for subscriber in subscribers {
@@ -77,8 +77,8 @@ final public class Event<T> {
 /// Wrapper that contains information related to a subscription.
 fileprivate struct EventSubscription<T> {
     weak var target: AnyObject?
-    var handler: (T) -> ()
-    var id: ObjectIdentifier
+    let handler: (T) -> ()
+    let id: ObjectIdentifier
     
     init(target: AnyObject, handler: @escaping (T) -> ()) {
         self.target = target
@@ -93,7 +93,7 @@ final public class Observable<T> {
     
     public var value: T {
         didSet {
-            didChanged.trigger(data: (value, oldValue))
+            didChanged.trigger((value, oldValue))
         }
     }
     
