@@ -19,7 +19,7 @@ In comparison with Cocoa mechanisms, SwiftEvents has the following features:
 
 - [x] Ability to observe properties in any class or struct
 
-- [ ] Easier to test, maintain and debug
+- [x] Easier to debug and test, since there is no dependency on UIKit
 
 Installation
 ------------
