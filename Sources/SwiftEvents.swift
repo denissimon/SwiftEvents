@@ -27,14 +27,33 @@ final public class Event<T> {
     ///
     /// - Parameter target: The target object that subscribes to the Event. If the target object is
     ///   deallocated, it is automatically removed from the Event subscribers.
+    /// - Parameter queue: The queue (and optionally qos) in which the handler should be executed
+    ///   when the Event triggers.
+    /// - Parameter delay: Whether the handler should be executed with the specified delay.
+    /// - Parameter onetime: Whether the handler should be executed onetime and then removed from the
+    ///   Event subscribers.
     /// - Parameter handler: The closure you want executed when the Event triggers.
-    public func addSubscriber<O: AnyObject>(target: O, handler: @escaping (O, T) -> ()) {
+    public func addSubscriber<O: AnyObject>(
+        target: O,
+        queue: DispatchQueue = .main,
+        delay: Double = 0.0,
+        onetime: Bool = false,
+        handler: @escaping (O, T) -> ()) {
+        
         let magicHandler: (T) -> () = { [weak target] data in
             if let target = target {
                 handler(target, data)
             }
         }
-        let wrapper = EventSubscription(target: target, handler: magicHandler)
+        
+        let wrapper = EventSubscription(
+            target: target,
+            queue: queue,
+            delay: delay,
+            onetime: onetime,
+            handler: magicHandler
+        )
+        
         subscribers.append(wrapper)
     }
     
@@ -46,10 +65,55 @@ final public class Event<T> {
         
         for subscriber in subscribers {
             if subscriber.target != nil {
-                subscriber.handler(data)
+                
+                callHandler(
+                    on: subscriber.queue,
+                    delay: subscriber.delay,
+                    data: data,
+                    handler: subscriber.handler
+                )
+                
+                if subscriber.onetime {
+                    removeSubscriber(id: subscriber.id)
+                }
+                
             } else {
                 // Removes the subscriber when it is deallocated.
                 removeSubscriber(id: subscriber.id)
+            }
+        }
+    }
+    
+    /// Executes the handler with the provided data and parameters.
+    private func callHandler(on queue: DispatchQueue, delay: Double, data: T, handler: @escaping (T) -> ()) {
+        if queue == .main {
+            if delay == 0 {
+                DispatchQueue.main.async { handler(data) }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { handler(data) }
+            }
+        } else {
+            let global = [
+                "com.apple.root.default-qos",
+                "com.apple.root.background-qos",
+                "com.apple.root.user-initiated-qos",
+                "com.apple.root.user-interactive-qos",
+                "com.apple.root.utility-qos"
+            ]
+            if global.contains(queue.label) {
+                if delay == 0 {
+                    DispatchQueue.global(qos: queue.qos.qosClass).async { handler(data) }
+                } else {
+                    DispatchQueue.global(qos: queue.qos.qosClass)
+                        .asyncAfter(deadline: .now() + delay) { handler(data) }
+                }
+            } else {
+                if delay == 0 {
+                    DispatchQueue.init(label: queue.label).async { handler(data) }
+                } else {
+                    DispatchQueue.init(label: queue.label)
+                        .asyncAfter(deadline: .now() + delay) { handler(data) }
+                }
             }
         }
     }
@@ -77,13 +141,19 @@ final public class Event<T> {
 /// Wrapper that contains information related to a subscription.
 fileprivate struct EventSubscription<T> {
     weak var target: AnyObject?
+    let queue: DispatchQueue
+    let delay: Double
+    let onetime: Bool
     let handler: (T) -> ()
     let id: ObjectIdentifier
     
-    init(target: AnyObject, handler: @escaping (T) -> ()) {
+    init(target: AnyObject, queue: DispatchQueue, delay: Double, onetime: Bool, handler: @escaping (T) -> ()) {
         self.target = target
+        self.queue = queue
+        self.delay = delay
+        self.onetime = onetime
         self.handler = handler
-        self.id = ObjectIdentifier(target)
+        id = ObjectIdentifier(target)
     }
 }
 
