@@ -19,7 +19,7 @@ final public class Event<T> {
     }
     
     /// The number of times the Event has triggered.
-    public private(set) var triggerCount = Int()
+    public private(set) var triggersCount = Int()
     
     public init() {}
     
@@ -61,7 +61,7 @@ final public class Event<T> {
     ///
     /// - Parameter data: The data to trigger the Event with.
     public func trigger(_ data: T) {
-        triggerCount += 1
+        triggersCount += 1
         
         for subscriber in subscribers {
             if subscriber.target != nil {
