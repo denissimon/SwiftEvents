@@ -14,6 +14,7 @@ final public class Event<T> {
     
     private var subscribers = [EventSubscription<T>]()
     
+    /// The number of subscribers to the Event.
     public var subscribersCount: Int {
         return subscribers.count
     }
