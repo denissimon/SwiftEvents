@@ -5,9 +5,9 @@ Pod::Spec.new do |s|
   s.authors      = {
     'Denis Simon' => 'denis.v.simon@gmail.com'
   }
-  s.summary      = 'A lightweight, pure-Swift alternative to Cocoa KVO and NotificationCenter.'
+  s.summary      = 'A lightweight, pure-Swift library for implementing events in iOS and other platforms.'
   s.description      = <<-DESC
-  A lightweight, pure-Swift alternative to Cocoa KVO and NotificationCenter. One of the bright examples of using SwiftEvents is MVVM, as it provides an easier way for the View to react to changes in the ViewModel.
+  SwiftEvents is a lightweight, pure-Swift library for implementing events in iOS, macOS, watchOS, tvOS and Linux. It has NotificationCenter (multiple subscribers to the event), Delegation (one subscriber to the event) and KVO (observing properties using events) functionality in one simple, not verbose and type-safe API. Features: Type Safety, Thread Safety, Memory Safety, Cancelable subscriptions, and others.
                        DESC
   s.license      = { :type => 'MIT' }
 
