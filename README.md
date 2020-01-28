@@ -11,7 +11,7 @@ Features:
 
 - [x] Thread Safety: notifications can be sent on a different thread than where subscribers are registered without any data issues
 
-- [x] Memory Safety: a built-in solution for preventing retain cycles to **always be protected** from memory leaks (no need to constantly specify `[weak self]`)
+- [x] Memory Safety: a built-in solution for preventing retain cycles to **always be protected** from memory leaks (and no need to constantly specify `[weak self]` in closures)
 
 - [x] Cancelable subscriptions: automatic removal of subscribers when they are deallocated, so you don't need to explicitly manage this
 
@@ -22,15 +22,7 @@ Features:
 Installation
 ------------
 
-### CocoaPods
-
-To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
-
-```ruby
-pod 'SwiftEvents'
-```
-
-### Swift Package Manager
+#### Swift Package Manager
 
 To install SwiftEvents using the [Swift Package Manager](https://swift.org/package-manager), add it to your `Package.swift` file:
 
@@ -40,9 +32,25 @@ dependencies: [
 ]
 ```
 
-### Manual
+#### CocoaPods
 
-Copy the `Sources` folder into your project.
+To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
+
+```ruby
+pod 'SwiftEvents'
+```
+
+#### Carthage
+
+To install SwiftEvents using [Carthage](https://github.com/Carthage/Carthage), add this line to your `Cartfile`:
+
+```
+github "denissimon/SwiftEvents"
+```
+
+#### Manual
+
+Drag `SwiftEvents.swift` anywhere in your project.
 
 Usage
 -----
