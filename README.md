@@ -1,7 +1,7 @@
 SwiftEvents
 ===========
 
-**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `NotificationCenter` (multiple subscribers to the event), `Delegation` (one subscriber to the event) and `KVO` (observing properties using events) functionality in one simple, **not verbose** and **type-safe API**. 
+**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `Delegation` (one subscriber to the event), `NotificationCenter` (multiple subscribers to the event) and `KVO` (observing properties using events) functionality in one simple, **not verbose** and **type-safe API**. 
 
 The purpose of SwiftEvents is to simplify and improve the communication between components in a modern Swift project.
 
