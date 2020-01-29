@@ -18,8 +18,13 @@ final public class Event<T> {
         return subscribers.count
     }
     
-    /// The number of times the Event has triggered.
+    /// The number of times the Event has been triggered.
     public private(set) var triggersCount = Int()
+    
+    /// The number of times the handlers of the Event subscribers have been executed.
+    public private(set) var handledCount = Int()
+    
+    private let lock: NSRecursiveLock = .init()
     
     public init() {}
     
@@ -54,7 +59,9 @@ final public class Event<T> {
             handler: magicHandler
         )
         
-        subscribers.append(wrapper)
+        self.lock.with {
+            self.subscribers.append(wrapper)
+        }
     }
     
     /// Triggers the Event, calls all handlers.
@@ -86,35 +93,39 @@ final public class Event<T> {
     
     /// Executes the handler with the provided data and parameters.
     private func callHandler(on queue: DispatchQueue, delay: Double, data: T, handler: @escaping (T) -> ()) {
-        if queue == .main {
-            if delay == 0 {
-                DispatchQueue.main.async { handler(data) }
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { handler(data) }
-            }
-        } else {
-            let global = [
-                "com.apple.root.default-qos",
-                "com.apple.root.background-qos",
-                "com.apple.root.user-initiated-qos",
-                "com.apple.root.user-interactive-qos",
-                "com.apple.root.utility-qos"
-            ]
-            if global.contains(queue.label) {
+        self.lock.with {
+            if queue == .main {
                 if delay == 0 {
-                    DispatchQueue.global(qos: queue.qos.qosClass).async { handler(data) }
+                    DispatchQueue.main.async { handler(data) }
                 } else {
-                    DispatchQueue.global(qos: queue.qos.qosClass)
-                        .asyncAfter(deadline: .now() + delay) { handler(data) }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) { handler(data) }
                 }
             } else {
-                if delay == 0 {
-                    DispatchQueue.init(label: queue.label).async { handler(data) }
+                let global = [
+                    "com.apple.root.default-qos",
+                    "com.apple.root.background-qos",
+                    "com.apple.root.user-initiated-qos",
+                    "com.apple.root.user-interactive-qos",
+                    "com.apple.root.utility-qos"
+                ]
+                if global.contains(queue.label) {
+                    if delay == 0 {
+                        DispatchQueue.global(qos: queue.qos.qosClass).async { handler(data) }
+                    } else {
+                        DispatchQueue.global(qos: queue.qos.qosClass)
+                            .asyncAfter(deadline: .now() + delay) { handler(data) }
+                    }
                 } else {
-                    DispatchQueue.init(label: queue.label)
-                        .asyncAfter(deadline: .now() + delay) { handler(data) }
+                    if delay == 0 {
+                        DispatchQueue.init(label: queue.label).async { handler(data) }
+                    } else {
+                        DispatchQueue.init(label: queue.label)
+                            .asyncAfter(deadline: .now() + delay) { handler(data) }
+                    }
                 }
             }
+            
+            self.handledCount += 1
         }
     }
     
@@ -122,7 +133,9 @@ final public class Event<T> {
     ///
     /// - Parameter id: The id of the subscriber.
     private func removeSubscriber(id: ObjectIdentifier) {
-        subscribers = subscribers.filter { $0.id != id }
+        self.lock.with {
+            self.subscribers = self.subscribers.filter { $0.id != id }
+        }
     }
     
     /// Removes a specific subscriber from the Event subscribers.
@@ -134,7 +147,9 @@ final public class Event<T> {
     
     /// Removes all subscribers on this instance.
     public func removeAllSubscribers() {
-        subscribers.removeAll()
+        self.lock.with {
+            self.subscribers.removeAll()
+        }
     }
 }
 

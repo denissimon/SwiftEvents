@@ -31,7 +31,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.2.0")
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.3.0")
 ]
 ```
 
@@ -40,7 +40,7 @@ dependencies: [
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 0.2.0'
+pod 'SwiftEvents', '~> 0.3.0'
 ```
 
 #### Carthage
@@ -53,7 +53,7 @@ github "denissimon/SwiftEvents"
 
 #### Manual
 
-Drag `SwiftEvents.swift` anywhere in your project.
+Copy the `Sources` folder into your project.
 
 Usage
 -----
@@ -296,7 +296,7 @@ someEvent.removeAllSubscribers()
 
 #### subscribersCount
 
-To get the count of Event subscribers:
+To get the number of subscribers to the Event:
 
 ```swift
 let subscribersCount = someEvent.subscribersCount
@@ -304,10 +304,18 @@ let subscribersCount = someEvent.subscribersCount
 
 #### triggersCount
 
-To get the count of Event triggers:
+To get the number of times the Event has been triggered:
 
 ```swift
 let triggersCount = someEvent.triggersCount
+```
+
+#### handledCount
+
+To get the number of times the handlers of the Event subscribers have been executed:
+
+```swift
+let handledCount = someEvent.handledCount
 ```
 
 #### Delayed sending notifications

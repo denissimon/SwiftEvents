@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		416F63CA23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416F63C923E12A080038D3C6 /* NSLocking+Extension.swift */; };
+		416F63CB23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416F63C923E12A080038D3C6 /* NSLocking+Extension.swift */; };
+		416F63CC23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416F63C923E12A080038D3C6 /* NSLocking+Extension.swift */; };
+		416F63CD23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416F63C923E12A080038D3C6 /* NSLocking+Extension.swift */; };
 		418B3F5523E07ADC00F4D03B /* SwiftEvents.h in Headers */ = {isa = PBXBuildFile; fileRef = 418B3F5323E07ADC00F4D03B /* SwiftEvents.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		418B3F9123E07ECD00F4D03B /* SwiftEvents.h in Headers */ = {isa = PBXBuildFile; fileRef = 418B3F5323E07ADC00F4D03B /* SwiftEvents.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		418B3F9223E07ECE00F4D03B /* SwiftEvents.h in Headers */ = {isa = PBXBuildFile; fileRef = 418B3F5323E07ADC00F4D03B /* SwiftEvents.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -30,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		416F63C923E12A080038D3C6 /* NSLocking+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSLocking+Extension.swift"; sourceTree = "<group>"; };
 		418B3F5023E07ADC00F4D03B /* SwiftEvents.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftEvents.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		418B3F5323E07ADC00F4D03B /* SwiftEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftEvents.h; sourceTree = "<group>"; };
 		418B3F5E23E07B2100F4D03B /* SwiftEvents.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftEvents.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -113,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				418B3F9423E07F7200F4D03B /* SwiftEvents.swift */,
+				416F63C923E12A080038D3C6 /* NSLocking+Extension.swift */,
 				418B3F5323E07ADC00F4D03B /* SwiftEvents.h */,
 				418B3F8C23E07C8700F4D03B /* Info-iOS.plist */,
 				418B3F8D23E07C8700F4D03B /* Info-macOS.plist */,
@@ -362,6 +368,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				416F63CA23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */,
 				418B3F9523E07F7200F4D03B /* SwiftEvents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -370,6 +377,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				416F63CB23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */,
 				418B3F9623E07F7200F4D03B /* SwiftEvents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -378,6 +386,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				416F63CC23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */,
 				418B3F9723E07F7200F4D03B /* SwiftEvents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -386,6 +395,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				416F63CD23E12A080038D3C6 /* NSLocking+Extension.swift in Sources */,
 				418B3F9823E07F7200F4D03B /* SwiftEvents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
