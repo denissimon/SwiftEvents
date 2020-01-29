@@ -4,7 +4,7 @@ SwiftEvents
 [![Swift](https://img.shields.io/badge/Swift-4.2-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
-**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `Delegation` (one subscriber to the event), `NotificationCenter` (multiple subscribers to the event) and `KVO` (observing properties using events) functionality in one simple, **not verbose** and **type-safe API**. 
+**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `Delegation`, `NotificationCenter` and `Key-Value Observing (KVO)` functionality in one simple, **not verbose** and **type-safe API**. 
 
 The purpose of SwiftEvents is to simplify and improve the communication between components in a modern Swift project.
 
@@ -12,9 +12,9 @@ Features:
 
 - [x] Type Safety: the concrete type value is delivered to the subscriber without the need for downcasting
 
-- [x] Thread Safety: notifications can be sent on a different thread than where subscribers are registered without any data issues
+- [x] Thread Safety: notifications can be sent from any thread (or multiple threads) to any thread without issues
 
-- [x] Memory Safety: a built-in solution for preventing retain cycles to **always be protected** from memory leaks (and no need to constantly specify `[weak self]` in closures)
+- [x] Memory Safety: automatic preventing retain cycles in order to **always be protected** from memory leaks (and no need to constantly specify `[weak self]` in closures)
 
 - [x] Cancelable subscriptions: automatic removal of subscribers when they are deallocated, so you don't need to explicitly manage this
 
@@ -31,7 +31,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", majorVersion: 0)
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.2.0")
 ]
 ```
 
@@ -40,7 +40,7 @@ dependencies: [
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents'
+pod 'SwiftEvents', '~> 0.2.0'
 ```
 
 #### Carthage
@@ -60,9 +60,9 @@ Usage
 
 ### Delegation functionality
 
-Here is a common scenario: we have a ViewController and a Model that does some work, and we want the ViewController to be notified on the result of this work when it is completed, in order to update the UI.
+Here is a common scenario: we have a ViewController and a Model that does some work, and we want the ViewController to be notified on the result of this work when it is completed. So this is `one-to-one` notifications.
 
-With SwiftEvents, this can be done in just two steps: 
+With SwiftEvents, it can be done in just two steps: 
 1. Create an Event for the publisher
 2. Subscribe to the Event
 
@@ -115,9 +115,9 @@ You can use the Event with any complex type. As for the example above, it could 
 
 If notifications must be `one-to-many`, or two objects that need to be connected are too far apart (in different components/modules), SwiftEvents can be used in three steps:
 
-1. Create an EventService, which will be holding Events
-2. Subscribe to the appropriate Event
-3. Trigger the appropriate Event by the publisher
+1. Create an EventService
+2. Create Events which will be held by EventService
+3. Subscribe to the appropriate Event
 
 ```swift
 import SwiftEvents
