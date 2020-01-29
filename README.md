@@ -260,7 +260,7 @@ class NoteViewController: UIViewController {
 }
 ```
 
-In this example, every time the ViewModel changes the value of `infoLabel`, the View is notified (with the new and old values) and updates `infoLabel.text`.
+In this example, every time the ViewModel changes the value of `infoLabel`, the View is notified (with new and old values) and updates `infoLabel.text`.
 
 You can use the infix operator <<< to set a new value for an observable property:
 
@@ -338,7 +338,7 @@ someEvent.addSubscriber(target: self, onetime: true, handler: { (self, data) in
 })
 ```
 
-The optional parameters of `addSubscriber()` can be set together in any combination.
+Optional parameters of `addSubscriber()` can be set together in any combination.
 
 License
 -------

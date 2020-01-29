@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.author      = { 'Denis Simon' => 'denis.v.simon@gmail.com' }
   s.summary      = 'A lightweight, pure-Swift library for implementing events in iOS and other platforms'
   s.description      = <<-DESC
-  SwiftEvents is a lightweight, pure-Swift library for implementing events. It has Delegation (one subscriber to the event), NotificationCenter (multiple subscribers to the event) and KVO (observing properties using events) functionality in one simple, not verbose and type-safe API.
+  SwiftEvents is a lightweight, pure-Swift library for implementing events. It has Delegation, NotificationCenter and Key-Value Observing (KVO) functionality in one simple, not verbose and type-safe API.
                        DESC
   s.license      = { :type => 'MIT' }
 
