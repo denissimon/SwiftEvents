@@ -1,9 +1,9 @@
 //
-//  SwiftEvents.h
-//  SwiftEvents
+// SwiftEvents.h
+// SwiftEvents
 //
-//  Created by Denis Simon on 28.01.2020.
-//  Copyright © 2020 SwiftEvents. All rights reserved.
+// Created by Denis Simon on 01/28/2020.
+// Copyright © 2020 SwiftEvents. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
