@@ -68,81 +68,81 @@ final public class Event<T> {
     ///
     /// - Parameter data: The data to trigger the Event with.
     public func trigger(_ data: T) {
-        triggersCount += 1
-        
-        for subscriber in subscribers {
-            if subscriber.target != nil {
-                
-                callHandler(
-                    on: subscriber.queue,
-                    delay: subscriber.delay,
-                    data: data,
-                    handler: subscriber.handler
-                )
-                
-                if subscriber.onetime {
-                    removeSubscriber(id: subscriber.id)
+        self.lock.with {
+            self.triggersCount += 1
+            
+            for subscriber in self.subscribers {
+                if subscriber.target != nil {
+                    
+                    self.callHandler(
+                        on: subscriber.queue,
+                        delay: subscriber.delay,
+                        data: data,
+                        handler: subscriber.handler
+                    )
+                    
+                    if subscriber.onetime {
+                        self.removeSubscriber(id: subscriber.id)
+                    }
+                    
+                } else {
+                    // Removes the subscriber when it is deallocated.
+                    self.removeSubscriber(id: subscriber.id)
                 }
-                
-            } else {
-                // Removes the subscriber when it is deallocated.
-                removeSubscriber(id: subscriber.id)
             }
         }
     }
     
     /// Executes the handler with the provided data and parameters.
     private func callHandler(on queue: DispatchQueue, delay: Double, data: T, handler: @escaping (T) -> ()) {
-        self.lock.with {
-            if queue == .main {
+        if queue == .main {
+            if delay == 0 {
+                DispatchQueue.main.async { handler(data) }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { handler(data) }
+            }
+        } else {
+            let global = [
+                "com.apple.root.default-qos",
+                "com.apple.root.background-qos",
+                "com.apple.root.user-initiated-qos",
+                "com.apple.root.user-interactive-qos",
+                "com.apple.root.utility-qos"
+            ]
+            if global.contains(queue.label) {
                 if delay == 0 {
-                    DispatchQueue.main.async { handler(data) }
+                    DispatchQueue.global(qos: queue.qos.qosClass).async { handler(data) }
                 } else {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) { handler(data) }
+                    DispatchQueue.global(qos: queue.qos.qosClass)
+                        .asyncAfter(deadline: .now() + delay) { handler(data) }
                 }
             } else {
-                let global = [
-                    "com.apple.root.default-qos",
-                    "com.apple.root.background-qos",
-                    "com.apple.root.user-initiated-qos",
-                    "com.apple.root.user-interactive-qos",
-                    "com.apple.root.utility-qos"
-                ]
-                if global.contains(queue.label) {
-                    if delay == 0 {
-                        DispatchQueue.global(qos: queue.qos.qosClass).async { handler(data) }
-                    } else {
-                        DispatchQueue.global(qos: queue.qos.qosClass)
-                            .asyncAfter(deadline: .now() + delay) { handler(data) }
-                    }
+                if delay == 0 {
+                    DispatchQueue.init(label: queue.label).async { handler(data) }
                 } else {
-                    if delay == 0 {
-                        DispatchQueue.init(label: queue.label).async { handler(data) }
-                    } else {
-                        DispatchQueue.init(label: queue.label)
-                            .asyncAfter(deadline: .now() + delay) { handler(data) }
-                    }
+                    DispatchQueue.init(label: queue.label)
+                        .asyncAfter(deadline: .now() + delay) { handler(data) }
                 }
             }
-            
-            self.handledCount += 1
         }
+        
+        self.handledCount += 1
     }
     
     /// Removes a specific subscriber from the Event subscribers.
     ///
     /// - Parameter id: The id of the subscriber.
     private func removeSubscriber(id: ObjectIdentifier) {
-        self.lock.with {
-            self.subscribers = self.subscribers.filter { $0.id != id }
-        }
+        subscribers = subscribers.filter { $0.id != id }
     }
     
     /// Removes a specific subscriber from the Event subscribers.
     ///
     /// - Parameter target: The target object that subscribes to the Event.
     public func removeSubscriber(target: AnyObject) {
-        removeSubscriber(id: ObjectIdentifier(target))
+        self.lock.with {
+            self.removeSubscriber(id: ObjectIdentifier(target))
+        }
     }
     
     /// Removes all subscribers on this instance.
