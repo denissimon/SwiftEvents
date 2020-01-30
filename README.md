@@ -12,13 +12,13 @@ Features:
 
 - [x] Type Safety: the concrete type value is delivered to the subscriber without the need for downcasting
 
-- [x] Thread Safety: notifications can be sent from any thread (or multiple threads) to any thread without issues
+- [x] Thread Safety: you can `addSubscriber`, `trigger`, `removeSubscriber` from any thread without issues
 
 - [x] Memory Safety: automatic preventing retain cycles in order to **always be protected** from memory leaks (and no need to constantly specify `[weak self]` in closures)
 
 - [x] Cancelable subscriptions: automatic removal of subscribers when they are deallocated, so you don't need to explicitly manage this
 
-- [x] Delayed and one-time sending notifications
+- [x] One-time and delayed sending notifications
 
 - [x] Ability to observe properties of any class or struct
 
@@ -31,7 +31,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.3.0")
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.4.0")
 ]
 ```
 
@@ -40,7 +40,7 @@ dependencies: [
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 0.3.0'
+pod 'SwiftEvents', '~> 0.4.0'
 ```
 
 #### Carthage
@@ -53,16 +53,14 @@ github "denissimon/SwiftEvents"
 
 #### Manual
 
-Copy the `Sources` folder into your project.
+Drag `SwiftEvents.swift` anywhere in your project.
 
 Usage
 -----
 
 ### Delegation functionality
 
-Here is a common scenario: we have a ViewController and a Model that does some work, and we want the ViewController to be notified on the result of this work when it is completed. So this is `one-to-one` notifications.
-
-With SwiftEvents, it can be done in just two steps: 
+With SwiftEvents, such a `one-to-one` connection can be done in just two steps: 
 1. Create an Event for the publisher
 2. Subscribe to the Event
 
@@ -109,11 +107,13 @@ class MyViewController: UIViewController {
     
 ```
 
-You can use the Event with any complex type. As for the example above, it could have been `(UIImage?, Int)`, where `Int` means the HTTP response status code, to show a message in case of an error. You can also create multiple Events (didDownloadEvent, onHTTPErrorEvent, etc), and trigger only what is needed.
+You can use the Event with any complex type. As for the example above, it could have been `(UIImage?, Int)`, where `Int` means the HTTP response status code, in order to show a message in case of an error. 
+
+You can also create multiple Events (didDownloadEvent, onHTTPErrorEvent, etc), and trigger only what is needed.
 
 ### NotificationCenter functionality
 
-If notifications must be `one-to-many`, or two objects that need to be connected are too far apart (in different components/modules), SwiftEvents can be used in three steps:
+If notifications must be `one-to-many`, or two objects that need to be connected are too far apart, SwiftEvents can be used in three steps:
 
 1. Create an EventService
 2. Create Events which will be held by EventService
@@ -190,7 +190,7 @@ pub.requestData()
 
 ### KVO functionality
 
-Suppose we want to use the MVVM architecture. Observation is one of the methods used for this purpose, and this way the View will be able to react to changes in the ViewModel. Just two steps again:
+Just two steps again:
 
 1. Replace the `Type` of property to observe with the `Observable<Type>`
 2. Subscribe to the `didChanged` Event
@@ -200,79 +200,67 @@ import Foundation
 import SwiftEvents
 
 class NoteViewModel: NSObject, UITextViewDelegate {
-    
-    let model: Note // text: String, lastEdit: Date?
-    
+    let model: Note
+
     var textView: String!
     var infoLabel: Observable<String>!
-    
+
     init(model: Note) {
         self.model = model
         super.init()
         textView = model.text
-        infoLabel = Observable<String>("Last edit: \(getFormattedDate())")
+        infoLabel = Observable<String>("Last edit: \(model.editDate.formatted())")
     }
-    
-    // MARK: UITextViewDelegate
+
     func textViewDidEndEditing(_ textView: UITextView) {
-        // the model's data were updated with textView.text and Date()
-        textView = model.text
-        infoLabel.value = "Last edit: \(getFormattedDate())"
-    }
-    
-    func getFormattedDate() -> String {
-        var date = ""
-        // the model.lastEdit was formatted and transformed to String
-        return date
+        let now = Date()
+        infoLabel.value = "Last edit: \(now.formatted())"
+        // other code goes here
     }
 }
-
 ```
 
 ```swift
 import UIKit
 
-let model = Note()
-
 class NoteViewController: UIViewController {
-    
     var viewModel = NoteViewModel(model: model)
-    
+        
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var infoLabel: UILabel!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         textView.delegate = viewModel
         
         textView.text = viewModel.textView
         infoLabel.text = viewModel.infoLabel.value
-        
+
         viewModel.infoLabel.didChanged.addSubscriber(target: self, handler: { (self, value) in
             self.updateInfoLabel(value)
         })
     }
-        
+            
     func updateInfoLabel(_ value: (new: String, old: String)) {
         infoLabel.text = value.new
     }
 }
 ```
 
-In this example, every time the ViewModel changes the value of `infoLabel`, the View is notified (with new and old values) and updates `infoLabel.text`.
+In this MVVM example, every time the ViewModel changes the value of `infoLabel`, the View is notified with new and old values, and updates `infoLabel.text`.
 
 You can use the infix operator <<< to set a new value for an observable property:
 
 ```swift
-infoLabel <<< "Last edit: \(getFormattedDate())"
+infoLabel <<< "Last edit: \(model.editDate.formatted())"
 ```
 
 ### Advanced topics
 
 #### Manual removal of a subscriber
 
-A subscriber can be removed from the Event subscribers manually, before it gets deallocated and removed automatically:
+A subscriber can be removed from the Event subscribers manually:
 
 ```swift
 func startListening() {
@@ -310,27 +298,20 @@ To get the number of times the Event has been triggered:
 let triggersCount = someEvent.triggersCount
 ```
 
-#### handledCount
+#### Optional `queue: DispatchQueue`
 
-To get the number of times the handlers of the Event subscribers have been executed:
-
-```swift
-let handledCount = someEvent.handledCount
-```
-
-#### Delayed sending notifications
-
-Set the optional parameter `delay: Double` when adding a subscriber, and its handler will be executed after the specified delay (in seconds):
+By default, a subscriber's handler is executed on the thread that triggers the Event. To change the default behaviour, you can set this parameter when adding a subscriber:
 
 ```swift
-someEvent.addSubscriber(target: self, delay: 1.0, handler: { (self, data) in
-    self.useData(data)
+// This executes the subscriber's handler on the main queue
+someEvent.addSubscriber(target: self, queue: .main, handler: { (self, data) in
+    self.updateUI(data)
 })
 ```
 
-#### One-time sending notifications
+#### Optional `onetime: Bool`
 
-Set the optional parameter `onetime: true` when adding a subscriber, and after a single notification it will be automatically removed from the Event subscribers:
+After a single notification, the subscriber will be automatically removed from the Event subscribers:
 
 ```swift
 someEvent.addSubscriber(target: self, onetime: true, handler: { (self, data) in
@@ -338,7 +319,17 @@ someEvent.addSubscriber(target: self, onetime: true, handler: { (self, data) in
 })
 ```
 
-Optional parameters of `addSubscriber()` can be set together in any combination.
+#### Optional `delay: Double`
+
+For executing the subscriber's handler with a delay (in seconds):
+
+```swift
+someEvent.addSubscriber(target: self, delay: 1.0, handler: { (self, data) in
+    self.useData(data)
+})
+```
+
+The default queue for delayed notifications is `global()`. You can set another by specifying an additional parameter `queue`.
 
 License
 -------

@@ -13,18 +13,19 @@ final public class Event<T> {
     
     private var subscribers = [EventSubscription<T>]()
     
+    private let notificationQueue = DispatchQueue(label: "com.swift.events.dispatch.queue", attributes: .concurrent)
+    
     /// The number of subscribers to the Event.
     public var subscribersCount: Int {
-        return subscribers.count
+        return getSubscribers().count
     }
     
     /// The number of times the Event has been triggered.
-    public private(set) var triggersCount = Int()
+    private var _triggersCount = Int()
     
-    /// The number of times the handlers of the Event subscribers have been executed.
-    public private(set) var handledCount = Int()
-    
-    private let lock: NSRecursiveLock = .init()
+    public var triggersCount: Int {
+        return getTriggersCount()
+    }
     
     public init() {}
     
@@ -32,15 +33,14 @@ final public class Event<T> {
     ///
     /// - Parameter target: The target object that subscribes to the Event. If the target object is
     ///   deallocated, it is automatically removed from the Event subscribers.
-    /// - Parameter queue: The queue (and optionally qos) in which the handler should be executed
-    ///   when the Event triggers.
+    /// - Parameter queue: The queue in which the handler should be executed when the Event triggers.
     /// - Parameter delay: Whether the handler should be executed with the specified delay.
     /// - Parameter onetime: Whether the handler should be executed onetime and then removed from the
     ///   Event subscribers.
     /// - Parameter handler: The closure you want executed when the Event triggers.
     public func addSubscriber<O: AnyObject>(
         target: O,
-        queue: DispatchQueue = .main,
+        queue: DispatchQueue? = nil,
         delay: Double = 0.0,
         onetime: Bool = false,
         handler: @escaping (O, T) -> ()) {
@@ -59,7 +59,7 @@ final public class Event<T> {
             handler: magicHandler
         )
         
-        self.lock.with {
+        notificationQueue.async(flags: .barrier) {
             self.subscribers.append(wrapper)
         }
     }
@@ -68,101 +68,107 @@ final public class Event<T> {
     ///
     /// - Parameter data: The data to trigger the Event with.
     public func trigger(_ data: T) {
-        self.lock.with {
-            self.triggersCount += 1
-            
-            for subscriber in self.subscribers {
-                if subscriber.target != nil {
-                    
-                    self.callHandler(
-                        on: subscriber.queue,
-                        delay: subscriber.delay,
-                        data: data,
-                        handler: subscriber.handler
-                    )
-                    
-                    if subscriber.onetime {
-                        self.removeSubscriber(id: subscriber.id)
-                    }
-                    
-                } else {
-                    // Removes the subscriber when it is deallocated.
-                    self.removeSubscriber(id: subscriber.id)
+        notificationQueue.async(flags: .barrier) {
+            self._triggersCount += 1
+        }
+        
+        let subscribersDict = getSubscribers()
+        
+        for subscriber in subscribersDict {
+            if subscriber.target != nil {
+                
+                self.callHandler(
+                    on: subscriber.queue,
+                    delay: subscriber.delay,
+                    data: data,
+                    handler: subscriber.handler
+                )
+                
+                if subscriber.onetime {
+                    removeSubscriber(id: subscriber.id)
                 }
+                
+            } else {
+                // Removes the subscriber when it is deallocated.
+                removeSubscriber(id: subscriber.id)
             }
         }
     }
     
     /// Executes the handler with the provided data and parameters.
-    private func callHandler(on queue: DispatchQueue, delay: Double, data: T, handler: @escaping (T) -> ()) {
-        if queue == .main {
+    private func callHandler(on queue: DispatchQueue?, delay: Double, data: T, handler: @escaping (T) -> ()) {
+        guard let queue = queue else {
             if delay == 0 {
-                DispatchQueue.main.async { handler(data) }
+                handler(data)
             } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { handler(data) }
-            }
-        } else {
-            let global = [
-                "com.apple.root.default-qos",
-                "com.apple.root.background-qos",
-                "com.apple.root.user-initiated-qos",
-                "com.apple.root.user-interactive-qos",
-                "com.apple.root.utility-qos"
-            ]
-            if global.contains(queue.label) {
-                if delay == 0 {
-                    DispatchQueue.global(qos: queue.qos.qosClass).async { handler(data) }
-                } else {
-                    DispatchQueue.global(qos: queue.qos.qosClass)
-                        .asyncAfter(deadline: .now() + delay) { handler(data) }
-                }
-            } else {
-                if delay == 0 {
-                    DispatchQueue.init(label: queue.label).async { handler(data) }
-                } else {
-                    DispatchQueue.init(label: queue.label)
-                        .asyncAfter(deadline: .now() + delay) { handler(data) }
+                DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+                    handler(data)
                 }
             }
+            return
         }
         
-        self.handledCount += 1
+        if delay == 0 {
+            queue.async {
+                handler(data)
+            }
+        } else {
+            queue.asyncAfter(deadline: .now() + delay) {
+                handler(data)
+            }
+        }
     }
     
     /// Removes a specific subscriber from the Event subscribers.
     ///
     /// - Parameter id: The id of the subscriber.
     private func removeSubscriber(id: ObjectIdentifier) {
-        subscribers = subscribers.filter { $0.id != id }
+        notificationQueue.async(flags: .barrier) {
+            self.subscribers = self.subscribers.filter { $0.id != id }
+        }
     }
     
     /// Removes a specific subscriber from the Event subscribers.
     ///
     /// - Parameter target: The target object that subscribes to the Event.
     public func removeSubscriber(target: AnyObject) {
-        self.lock.with {
-            self.removeSubscriber(id: ObjectIdentifier(target))
-        }
+        removeSubscriber(id: ObjectIdentifier(target))
     }
     
     /// Removes all subscribers on this instance.
     public func removeAllSubscribers() {
-        self.lock.with {
+        notificationQueue.async(flags: .barrier) {
             self.subscribers.removeAll()
         }
+    }
+    
+    private func getSubscribers() -> [EventSubscription<T>] {
+        var result = [EventSubscription<T>]()
+        notificationQueue.sync {
+            result = subscribers
+        }
+        return result
+    }
+    
+    private func getTriggersCount() -> Int {
+        var result = Int()
+        notificationQueue.sync {
+            result = _triggersCount
+        }
+        return result
     }
 }
 
 /// Wrapper that contains information related to a subscription.
 fileprivate struct EventSubscription<T> {
     weak var target: AnyObject?
-    let queue: DispatchQueue
+    let queue: DispatchQueue?
     let delay: Double
     let onetime: Bool
     let handler: (T) -> ()
     let id: ObjectIdentifier
     
-    init(target: AnyObject, queue: DispatchQueue, delay: Double, onetime: Bool, handler: @escaping (T) -> ()) {
+    init(target: AnyObject, queue: DispatchQueue?, delay: Double, onetime: Bool, handler: @escaping (T) -> ()) {
         self.target = target
         self.queue = queue
         self.delay = delay
