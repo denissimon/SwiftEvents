@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SwiftEvents'
-  s.version      = '0.4.0'
+  s.version      = '0.4.1'
   s.homepage     = 'https://github.com/denissimon/SwiftEvents'
   s.author      = { 'Denis Simon' => 'denis.v.simon@gmail.com' }
   s.summary      = 'A lightweight, pure-Swift library for implementing events in iOS and other platforms'
