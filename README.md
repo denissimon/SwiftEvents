@@ -37,7 +37,7 @@ dependencies: [
 
 #### CocoaPods
 
-To install SwiftEvents using [CocoaPods](https://cocoapods.org), add it to your `Podfile`:
+To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
 pod 'SwiftEvents', '~> 0.4.0'
@@ -79,7 +79,6 @@ class MyModel {
         }
     }
 }
-
 ```
 
 ```swift
@@ -104,7 +103,6 @@ class MyViewController: UIViewController {
         model.downloadImage(for: /* image url */)
     }
 }
-    
 ```
 
 You can use the Event with any complex type. As for the example above, it could have been `(UIImage?, Int)`, where `Int` means the HTTP response status code, in order to show a message in case of an error. 
