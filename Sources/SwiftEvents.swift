@@ -1,9 +1,9 @@
 //
-// SwiftEvents.swift
-// https://github.com/denissimon/SwiftEvents
+//  SwiftEvents.swift
+//  https://github.com/denissimon/SwiftEvents
 //
-// Created by Denis Simon on 05/29/2019.
-// Copyright © 2019 SwiftEvents. All rights reserved.
+//  Created by Denis Simon on 05/29/2019.
+//  Copyright © 2019 SwiftEvents. All rights reserved.
 //
 
 import Foundation
