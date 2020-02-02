@@ -198,6 +198,7 @@ import Foundation
 import SwiftEvents
 
 class NoteViewModel: NSObject, UITextViewDelegate {
+    
     let model: Note
 
     var textView: String!
@@ -222,8 +223,9 @@ class NoteViewModel: NSObject, UITextViewDelegate {
 import UIKit
 
 class NoteViewController: UIViewController {
+    
     var viewModel = NoteViewModel(model: model)
-        
+
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var infoLabel: UILabel!
 
