@@ -22,6 +22,8 @@ Features:
 
 - [x] Ability to observe properties of any class or struct
 
+- [x] Comprehensive unit test coverage
+
 Installation
 ------------
 
