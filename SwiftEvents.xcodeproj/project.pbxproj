@@ -17,6 +17,7 @@
 		418B3F9823E07F7200F4D03B /* SwiftEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418B3F9423E07F7200F4D03B /* SwiftEvents.swift */; };
 		418B3FA323E0856B00F4D03B /* SwiftEvents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 418B3F5023E07ADC00F4D03B /* SwiftEvents.framework */; };
 		418B3FAC23E08B2800F4D03B /* SwiftEventsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418B3FA023E0856B00F4D03B /* SwiftEventsTests.swift */; };
+		41E32D3423ECBB2E00C2BCA1 /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E32D3323ECBB2E00C2BCA1 /* EventService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		418B3FA023E0856B00F4D03B /* SwiftEventsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftEventsTests.swift; sourceTree = "<group>"; };
 		418B3FA223E0856B00F4D03B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		418B3FAA23E0862B00F4D03B /* LinuxMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinuxMain.swift; sourceTree = "<group>"; };
+		41E32D3323ECBB2E00C2BCA1 /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				418B3FA023E0856B00F4D03B /* SwiftEventsTests.swift */,
+				41E32D3323ECBB2E00C2BCA1 /* EventService.swift */,
 				418B3FA223E0856B00F4D03B /* Info.plist */,
 			);
 			path = SwiftEventsTests;
@@ -394,6 +397,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41E32D3423ECBB2E00C2BCA1 /* EventService.swift in Sources */,
 				418B3FAC23E08B2800F4D03B /* SwiftEventsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
