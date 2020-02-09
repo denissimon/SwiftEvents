@@ -7,6 +7,9 @@
 //
 
 import Foundation
+#if os(Linux)
+import Dispatch
+#endif
 
 /// A type-safe Event with built-in security.
 final public class Event<T> {
@@ -41,7 +44,7 @@ final public class Event<T> {
     public func addSubscriber<O: AnyObject>(
         target: O,
         queue: DispatchQueue? = nil,
-        delay: Double = 0.0,
+        delay: Double = 0,
         onetime: Bool = false,
         handler: @escaping (O, T) -> ()) {
         
