@@ -1,10 +1,10 @@
 SwiftEvents
 ===========
 
-[![Swift](https://img.shields.io/badge/Swift-4.2-orange.svg?style=flat)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-5.1-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
-**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `Delegation`, `NotificationCenter` and `Key-Value Observing (KVO)` functionality in one simple, **not verbose** and **type-safe API**. 
+**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `Delegation`, `NotificationCenter` and `Key-Value Observing (KVO)` functionality in one simple, not verbose and type-safe API.
 
 The purpose of SwiftEvents is to simplify and improve the communication between components in a modern Swift project.
 
@@ -14,7 +14,7 @@ Features:
 
 - [x] Thread Safety: you can `addSubscriber`, `trigger`, `removeSubscriber` from any thread without issues
 
-- [x] Memory Safety: automatic preventing retain cycles in order to **always be protected** from memory leaks (and no need to constantly specify `[weak self]` in closures)
+- [x] Memory Safety: automatic preventing retain cycles in order to always be protected from memory leaks (and no need to constantly specify `[weak self]` in closures)
 
 - [x] Cancelable subscriptions: automatic removal of subscribers when they are deallocated, so you don't need to explicitly manage this
 
@@ -27,22 +27,12 @@ Features:
 Installation
 ------------
 
-#### Swift Package Manager
-
-To install SwiftEvents using the [Swift Package Manager](https://swift.org/package-manager), add it to your `Package.swift` file:
-
-```swift
-dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.5.0")
-]
-```
-
 #### CocoaPods
 
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 0.5.0'
+pod 'SwiftEvents', '~> 1.0.0'
 ```
 
 #### Carthage
@@ -51,6 +41,16 @@ To install SwiftEvents using [Carthage](https://github.com/Carthage/Carthage), a
 
 ```
 github "denissimon/SwiftEvents"
+```
+
+#### Swift Package Manager
+
+To install SwiftEvents using the [Swift Package Manager](https://swift.org/package-manager), add it to your `Package.swift` file:
+
+```swift
+dependencies: [
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.0.0")
+]
 ```
 
 #### Manual
