@@ -142,6 +142,13 @@ final public class Event<T> {
         }
     }
     
+    /// Resets the number of times the Event has been triggered.
+    public func resetTriggersCount() {
+        notificationQueue.async(flags: .barrier) {
+            self._triggersCount = 0
+        }
+    }
+    
     private func getSubscribers() -> [EventSubscription<T>] {
         var result = [EventSubscription<T>]()
         notificationQueue.sync {

@@ -300,6 +300,14 @@ To get the number of times the Event has been triggered:
 let triggersCount = someEvent.triggersCount
 ```
 
+#### Reset of triggersCount
+
+To reset the number of times the Event has been triggered:
+
+```swift
+someEvent.resetTriggersCount()
+```
+
 #### Optional `queue: DispatchQueue`
 
 By default, a subscriber's handler is executed on the thread that triggers the Event. To change the default behaviour, you can set this parameter when adding a subscriber:
