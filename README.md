@@ -33,7 +33,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.4.2")
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "0.5.0")
 ]
 ```
 
@@ -42,7 +42,7 @@ dependencies: [
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 0.4.2'
+pod 'SwiftEvents', '~> 0.5.0'
 ```
 
 #### Carthage
@@ -107,7 +107,7 @@ class MyViewController: UIViewController {
 }
 ```
 
-You can use the Event with any complex type. As for the example above, it could have been `(UIImage?, Int)`, where `Int` means the HTTP response status code, in order to show a message in case of an error. 
+You can use the Event with any complex type. As for the example above, it could have been `(UIImage?, Int)`, where `Int` means the HTTP response status code in order to show a message in case of an error. 
 
 You can also create multiple Events (didDownloadEvent, onHTTPErrorEvent, etc), and trigger only what is needed.
 
@@ -250,7 +250,7 @@ class NoteViewController: UIViewController {
 }
 ```
 
-In this MVVM example, every time the ViewModel changes the value of `infoLabel`, the View is notified with new and old values, and updates `infoLabel.text`.
+In this MVVM example, every time the ViewModel changes the value of `infoLabel`, the View is notified with new and old values and updates `infoLabel.text`.
 
 You can use the infix operator <<< to set a new value for an observable property:
 
