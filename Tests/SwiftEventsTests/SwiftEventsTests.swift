@@ -20,6 +20,7 @@ class SwiftEventsTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
+        
         eventInt = Event<Int?>()
         eventString = Event<String?>()
         eventMultiValues = Event<(Int, String)?>()
@@ -157,7 +158,7 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
         
-        subscriber1.stopListening()
+        EventService.get.sharedEvent.removeSubscriber(target: subscriber1)
         EventService.get.sharedEvent.trigger(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 1)
@@ -338,7 +339,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(handledCount, 2)
     }
     
-    //////// onetime, queue, delay  ///////////////////////////////////////////
+    //////// onetime, queue, delay ////////////////////////////////////////////
     
     func testSubscribeOnetime() {
         eventInt.addSubscriber(target: self, onetime: true, handler: { (self, _) in
@@ -490,7 +491,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(handledCount, 1)
     }
     
-    //////// KVO functionality  ///////////////////////////////////////////////
+    //////// KVO and bindings functionality ////////////////////////////////
     
     func testObservingProperties() {
         let str = Observable<String>("")
@@ -530,7 +531,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(oldValue, "")
     }
     
-    //////// testPerformance  /////////////////////////////////////////////////
+    //////// testPerformance ///////////////////////////////////////////////////
     
     func testPerformance() {
         self.measure() {
@@ -558,10 +559,6 @@ class Controller1 {
             self.handledCount += 1
         })
     }
-    
-    func stopListening() {
-        EventService.get.sharedEvent.removeSubscriber(target: self)
-    }
 }
 
 class Controller2 {
@@ -572,9 +569,5 @@ class Controller2 {
         EventService.get.sharedEvent.addSubscriber(target: self, handler: { (self, _) in
             self.handledCount += 1
         })
-    }
-    
-    func stopListening() {
-        EventService.get.sharedEvent.removeSubscriber(target: self)
     }
 }
