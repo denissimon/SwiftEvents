@@ -34,12 +34,10 @@ final public class Event<T> {
     
     /// Adds a new Event subscriber.
     ///
-    /// - Parameter target: The target object that subscribes to the Event. If the target object is
-    ///   deallocated, it is automatically removed from the Event subscribers.
+    /// - Parameter target: The target object that subscribes to the Event.
     /// - Parameter queue: The queue in which the handler should be executed when the Event triggers.
     /// - Parameter delay: Whether the handler should be executed with the specified delay.
-    /// - Parameter onetime: Whether the handler should be executed onetime and then removed from the
-    ///   Event subscribers.
+    /// - Parameter onetime: Whether the handler should be executed once and then removed from the Event subscribers.
     /// - Parameter handler: The closure you want executed when the Event triggers.
     public func addSubscriber<O: AnyObject>(
         target: O,
@@ -188,13 +186,13 @@ fileprivate struct EventSubscription<T> {
     }
 }
 
-/// KVO functionality
+/// For KVO and bindings functionality.
 final public class Observable<T> {
-    public let didChanged = Event<(T, T)>()
+    public let didChanged = Event<(new: T, old: T)>()
     
     public var value: T {
         didSet {
-            didChanged.trigger((value, oldValue))
+            didChanged.trigger((new: value, old: oldValue))
         }
     }
     
