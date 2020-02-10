@@ -4,9 +4,7 @@ SwiftEvents
 [![Swift](https://img.shields.io/badge/Swift-5.1-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
-**SwiftEvents** is a lightweight, pure-Swift library for implementing events. It has `Delegation`, `NotificationCenter` and `Key-Value Observing (KVO)` functionality in one simple, not verbose and type-safe API.
-
-The purpose of SwiftEvents is to simplify and improve the communication between components in a modern Swift project.
+SwiftEvents is a lightweight library for creating and observing events. It's type safe, thread safe and with memory safety. It has functionality of `delegation`, `NotificationCenter`, `key-value observing (KVO)` and `bindings` in one simple API.
 
 Features:
 
@@ -14,13 +12,9 @@ Features:
 
 - [x] Thread Safety: you can `addSubscriber`, `trigger`, `removeSubscriber` from any thread without issues
 
-- [x] Memory Safety: automatic preventing retain cycles in order to always be protected from memory leaks (and no need to constantly specify `[weak self]` in closures)
-
-- [x] Cancelable subscriptions: automatic removal of subscribers when they are deallocated, so you don't need to explicitly manage this
+- [x] Memory Safety: automatic preventing retain cycles and memory leaks (with no need to specify `[weak self]` in closures); as well as automatic removal of subscribers when they are deallocated 
 
 - [x] One-time and delayed sending notifications
-
-- [x] Ability to observe properties of any class or struct
 
 - [x] Comprehensive unit test coverage
 
@@ -32,7 +26,7 @@ Installation
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 1.0.0'
+pod 'SwiftEvents', '~> 1.1.0'
 ```
 
 #### Carthage
@@ -49,22 +43,25 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.0.0")
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.1.0")
 ]
 ```
 
 #### Manual
 
-Drag `SwiftEvents.swift` anywhere in your project.
+Copy `SwiftEvents.swift` into your project.
 
 Usage
 -----
 
 ### Delegation functionality
 
-With SwiftEvents, such a `one-to-one` connection can be done in just two steps: 
+With SwiftEvents, such a `one-to-one` connection can be done in just two steps:
+
 1. Create an Event for the publisher
 2. Subscribe to the Event
+
+Example:
 
 ```swift
 import Foundation
@@ -96,7 +93,7 @@ class MyViewController: UIViewController {
         
         model.didDownloadEvent.addSubscriber(target: self, handler: { (self, image) in
             if let image = image {
-                self.performUIUpdate(image)
+                self.performUpdate(image)
             }
         })
     }
@@ -107,9 +104,7 @@ class MyViewController: UIViewController {
 }
 ```
 
-You can use the Event with any complex type. As for the example above, it could have been `(UIImage?, Int)`, where `Int` means the HTTP response status code in order to show a message in case of an error. 
-
-You can also create multiple Events (didDownloadEvent, onHTTPErrorEvent, etc), and trigger only what is needed.
+You can use the Event with any complex type, including multiple values like `(UIImage, Int)?`. You can also create several events (didDownloadEvent, onHTTPErrorEvent, etc), and trigger only what is needed.
 
 ### NotificationCenter functionality
 
@@ -118,6 +113,8 @@ If notifications must be `one-to-many`, or two objects that need to be connected
 1. Create an EventService
 2. Create Events which will be held by EventService
 3. Subscribe to the appropriate Event
+
+Example:
 
 ```swift
 import SwiftEvents
@@ -138,12 +135,8 @@ class Controller1 {
     
     init() {
         EventService.get.onDataUpdate.addSubscriber(target: self, handler: { (self, data) in
-            self.useData(data)
+            print("Controller1: '\(data)'")
         })
-    }
-    
-    func useData(_ data: String?) {
-        print("Controller1 - data: '\(data)'")
     }
 }
 ```
@@ -153,12 +146,8 @@ class Controller2 {
     
     init() {
         EventService.get.onDataUpdate.addSubscriber(target: self, handler: { (self, data) in
-            self.useData(data)
+            print("Controller2: '\(data)'")
         })
-    }
-    
-    func useData(_ data: String?) {
-        print("Controller2 - data: '\(data)'")
     }
 }
 ```
@@ -184,39 +173,33 @@ let sub1 = Controller1()
 let sub2 = Controller2()
 let pub = DataModel()
 pub.requestData()
-// => Controller1 - data: 'some data'
-// => Controller2 - data: 'some data'
+// => Controller1: 'some data'
+// => Controller2: 'some data'
 ```
 
-### KVO functionality
+### KVO and bindings functionality
 
 Just two steps again:
 
 1. Replace the `Type` of property to observe with the `Observable<Type>`
 2. Subscribe to the `didChanged` Event
 
+Example:
+
 ```swift
 import Foundation
 import SwiftEvents
 
-class NoteViewModel: NSObject, UITextViewDelegate {
+class ViewModel {
     
-    let model: Note
+    var infoLabel: Observable<String>
 
-    var textView: String!
-    var infoLabel: Observable<String>!
-
-    init(model: Note) {
-        self.model = model
-        super.init()
-        textView = model.text
-        infoLabel = Observable<String>("Last edit: \(model.editDate.formatted())")
+    init() {
+        infoLabel = Observable<String>("last saved value")
     }
 
-    func textViewDidEndEditing(_ textView: UITextView) {
-        let now = Date()
-        infoLabel.value = "Last edit: \(now.formatted())"
-        // other code goes here
+    func set(newValue: String) {
+        infoLabel.value = newValue
     }
 }
 ```
@@ -224,39 +207,33 @@ class NoteViewModel: NSObject, UITextViewDelegate {
 ```swift
 import UIKit
 
-class NoteViewController: UIViewController {
+class View: UIViewController {
     
-    var viewModel = NoteViewModel(model: model)
+    var viewModel = ViewModel()
 
-    @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var infoLabel: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        textView.delegate = viewModel
-        
-        textView.text = viewModel.textView
         infoLabel.text = viewModel.infoLabel.value
-
+        
         viewModel.infoLabel.didChanged.addSubscriber(target: self, handler: { (self, value) in
-            self.updateInfoLabel(value)
+            self.infoLabel.text = value.new
         })
-    }
-            
-    func updateInfoLabel(_ value: (new: String, old: String)) {
-        infoLabel.text = value.new
     }
 }
 ```
 
-In this MVVM example, every time the ViewModel changes the value of `infoLabel`, the View is notified with new and old values and updates `infoLabel.text`.
+In this MVVM example, every time the ViewModel changes the value of observable property `infoLabel`, the View is notified with new and old values and updates `infoLabel.text`.
 
 You can use the infix operator <<< to set a new value for an observable property:
 
 ```swift
-infoLabel <<< "Last edit: \(model.editDate.formatted())"
+infoLabel <<< newValue
 ```
+
+Properties of any class or struct can be observable.
 
 ### Advanced topics
 
@@ -265,13 +242,13 @@ infoLabel <<< "Last edit: \(model.editDate.formatted())"
 A subscriber can be removed from the Event subscribers manually:
 
 ```swift
-func startListening() {
+func startSubscription() {
     someEvent.addSubscriber(target: self, handler: { (self, result) in
         print(result)
     })
 }
 
-func stopListening() {
+func cancelSubscription() {
     someEvent.removeSubscriber(target: self)
 }
 ```
@@ -321,7 +298,7 @@ someEvent.addSubscriber(target: self, queue: .main, handler: { (self, data) in
 
 #### Optional `onetime: Bool`
 
-After a single notification, the subscriber will be automatically removed from the Event subscribers:
+After a single notification, a subscriber will be automatically removed from the Event subscribers:
 
 ```swift
 someEvent.addSubscriber(target: self, onetime: true, handler: { (self, data) in
@@ -331,15 +308,13 @@ someEvent.addSubscriber(target: self, onetime: true, handler: { (self, data) in
 
 #### Optional `delay: Double`
 
-For executing the subscriber's handler with a delay (in seconds):
+For executing a subscriber's handler with a delay. If parameter `queue` is not set, delayed notifications are sent on the global queue.
 
 ```swift
 someEvent.addSubscriber(target: self, delay: 1.0, handler: { (self, data) in
     self.useData(data)
 })
 ```
-
-The default queue for delayed notifications is `global()`. You can set another by specifying an additional parameter `queue`.
 
 License
 -------
