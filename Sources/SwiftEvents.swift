@@ -36,15 +36,8 @@ final public class Event<T> {
     ///
     /// - Parameter target: The target object that subscribes to the Event.
     /// - Parameter queue: The queue in which the handler should be executed when the Event triggers.
-    /// - Parameter delay: Whether the handler should be executed with the specified delay.
-    /// - Parameter onetime: Whether the handler should be executed once and then removed from the Event subscribers.
     /// - Parameter handler: The closure you want executed when the Event triggers.
-    public func addSubscriber<O: AnyObject>(
-        target: O,
-        queue: DispatchQueue? = nil,
-        delay: Double = 0,
-        onetime: Bool = false,
-        handler: @escaping (O, T) -> ()) {
+    public func addSubscriber<O: AnyObject>(target: O, queue: DispatchQueue? = nil, handler: @escaping (O, T) -> ()) {
         
         let magicHandler: (T) -> () = { [weak target] data in
             if let target = target {
@@ -52,13 +45,7 @@ final public class Event<T> {
             }
         }
         
-        let wrapper = EventSubscription(
-            target: target,
-            queue: queue,
-            delay: delay,
-            onetime: onetime,
-            handler: magicHandler
-        )
+        let wrapper = EventSubscription(target: target, queue: queue, handler: magicHandler)
         
         notificationQueue.async(flags: .barrier) {
             self.subscribers.append(wrapper)
@@ -77,18 +64,7 @@ final public class Event<T> {
         
         for subscriber in subscribersDict {
             if subscriber.target != nil {
-                
-                self.callHandler(
-                    on: subscriber.queue,
-                    delay: subscriber.delay,
-                    data: data,
-                    handler: subscriber.handler
-                )
-                
-                if subscriber.onetime {
-                    removeSubscriber(id: subscriber.id)
-                }
-                
+                callHandler(on: subscriber.queue, data: data, handler: subscriber.handler)
             } else {
                 // Removes the subscriber when it is deallocated.
                 removeSubscriber(id: subscriber.id)
@@ -97,26 +73,13 @@ final public class Event<T> {
     }
     
     /// Executes the handler with the provided data and parameters.
-    private func callHandler(on queue: DispatchQueue?, delay: Double, data: T, handler: @escaping (T) -> ()) {
+    private func callHandler(on queue: DispatchQueue?, data: T, handler: @escaping (T) -> ()) {
         guard let queue = queue else {
-            if delay == 0 {
-                handler(data)
-            } else {
-                DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
-                    handler(data)
-                }
-            }
+            handler(data)
             return
         }
-        
-        if delay == 0 {
-            queue.async {
-                handler(data)
-            }
-        } else {
-            queue.asyncAfter(deadline: .now() + delay) {
-                handler(data)
-            }
+        queue.async {
+            handler(data)
         }
     }
     
@@ -171,16 +134,12 @@ final public class Event<T> {
 fileprivate struct EventSubscription<T> {
     weak var target: AnyObject?
     let queue: DispatchQueue?
-    let delay: Double
-    let onetime: Bool
     let handler: (T) -> ()
     let id: ObjectIdentifier
     
-    init(target: AnyObject, queue: DispatchQueue?, delay: Double, onetime: Bool, handler: @escaping (T) -> ()) {
+    init(target: AnyObject, queue: DispatchQueue?, handler: @escaping (T) -> ()) {
         self.target = target
         self.queue = queue
-        self.delay = delay
-        self.onetime = onetime
         self.handler = handler
         id = ObjectIdentifier(target)
     }
@@ -203,6 +162,6 @@ final public class Observable<T> {
 
 /// Helper operator to trigger Event data.
 infix operator <<<
-public func <<< <T> (left: Observable<T>?, right: @autoclosure () -> T) {
-    left?.value = right()
+public func <<< <T> (left: Observable<T>, right: @autoclosure () -> T) {
+    left.value = right()
 }

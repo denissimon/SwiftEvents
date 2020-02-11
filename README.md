@@ -14,8 +14,6 @@ Features:
 
 - [x] Memory Safety: automatic preventing retain cycles and memory leaks (with no need to specify `[weak self]` in closures); as well as automatic removal of subscribers when they are deallocated 
 
-- [x] One-time and delayed sending notifications
-
 - [x] Comprehensive unit test coverage
 
 Installation
@@ -26,7 +24,7 @@ Installation
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 1.1.0'
+pod 'SwiftEvents', '~> 1.1.1'
 ```
 
 #### Carthage
@@ -43,7 +41,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.1.0")
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.1.1")
 ]
 ```
 
@@ -225,7 +223,7 @@ class View: UIViewController {
 }
 ```
 
-In this MVVM example, every time the ViewModel changes the value of observable property `infoLabel`, the View is notified with new and old values and updates `infoLabel.text`.
+In this MVVM example, every time the ViewModel changes the value of observable property `infoLabel`, the View is notified with new and old values and updates the `infoLabel.text`.
 
 You can use the infix operator <<< to set a new value for an observable property:
 
@@ -285,7 +283,7 @@ To reset the number of times the Event has been triggered:
 someEvent.resetTriggersCount()
 ```
 
-#### Optional `queue: DispatchQueue`
+#### queue: DispatchQueue
 
 By default, a subscriber's handler is executed on the thread that triggers the Event. To change the default behaviour, you can set this parameter when adding a subscriber:
 
@@ -296,23 +294,15 @@ someEvent.addSubscriber(target: self, queue: .main, handler: { (self, data) in
 })
 ```
 
-#### Optional `onetime: Bool`
+#### One-time notification
 
-After a single notification, a subscriber will be automatically removed from the Event subscribers:
-
-```swift
-someEvent.addSubscriber(target: self, onetime: true, handler: { (self, data) in
-    self.useData(data)
-})
-```
-
-#### Optional `delay: Double`
-
-For executing a subscriber's handler with a delay. If parameter `queue` is not set, delayed notifications are sent on the global queue.
+To remove a subscriber from the Event subscribers after a single notification:
 
 ```swift
-someEvent.addSubscriber(target: self, delay: 1.0, handler: { (self, data) in
+// The handler of this subscriber will be executed only once
+someEvent.addSubscriber(target: self, handler: { (self, data) in
     self.useData(data)
+    self.someEvent.removeSubscriber(target: self)
 })
 ```
 
