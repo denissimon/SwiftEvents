@@ -186,6 +186,31 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(handledCount, 1)
     }
     
+    func testNTimeNotifications() {
+        var handledCount = 0
+        let n = 3
+        
+        // The handler of this subscriber will be executed only 3 times
+        eventInt.addSubscriber(target: self, handler: { (self, data) in
+            if let data = data {
+                if self.eventInt.triggersCount == n {
+                    self.eventInt.removeSubscriber(target: self)
+                }
+                handledCount += data
+            }
+        })
+        
+        XCTAssertEqual(eventInt.subscribersCount, 1)
+        
+        for _ in 0...3 {
+            eventInt.trigger(1)
+        }
+        
+        XCTAssertEqual(eventInt.subscribersCount, 0)
+        XCTAssertEqual(eventInt.triggersCount, 4)
+        XCTAssertEqual(handledCount, 3)
+    }
+    
     func testRemoveAllSubscribers() {
         var handledCount = 0
         
