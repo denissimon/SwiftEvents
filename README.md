@@ -1,7 +1,7 @@
 SwiftEvents
 ===========
 
-[![Swift](https://img.shields.io/badge/Swift-5.1-orange.svg?style=flat)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-5.3-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
 SwiftEvents is a lightweight library for creating and observing events. It's type safe, thread safe and with memory safety. It has functionality of `delegation`, `NotificationCenter`, `key-value observing (KVO)` and `bindings` in one simple API.
@@ -89,11 +89,11 @@ class MyViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        model.didDownloadEvent.addSubscriber(target: self, handler: { (self, image) in
+        model.didDownloadEvent.addSubscriber(target: self) { (self, image) in
             if let image = image {
                 self.performUpdate(image)
             }
-        })
+        }
     }
     
     func updateImage() {
@@ -132,9 +132,9 @@ public class EventService {
 class Controller1 {
     
     init() {
-        EventService.get.onDataUpdate.addSubscriber(target: self, handler: { (self, data) in
+        EventService.get.onDataUpdate.addSubscriber(target: self) { (self, data) in
             print("Controller1: '\(data)'")
-        })
+        }
     }
 }
 ```
@@ -143,9 +143,9 @@ class Controller1 {
 class Controller2 {
     
     init() {
-        EventService.get.onDataUpdate.addSubscriber(target: self, handler: { (self, data) in
+        EventService.get.onDataUpdate.addSubscriber(target: self) { (self, data) in
             print("Controller2: '\(data)'")
-        })
+        }
     }
 }
 ```
@@ -216,9 +216,9 @@ class View: UIViewController {
 
         infoLabel.text = viewModel.infoLabel.value
         
-        viewModel.infoLabel.didChanged.addSubscriber(target: self, handler: { (self, value) in
+        viewModel.infoLabel.didChanged.addSubscriber(target: self) { (self, value) in
             self.infoLabel.text = value.new
-        })
+        }
     }
 }
 ```
@@ -241,9 +241,9 @@ A subscriber can be removed from the Event subscribers manually:
 
 ```swift
 func startSubscription() {
-    someEvent.addSubscriber(target: self, handler: { (self, result) in
+    someEvent.addSubscriber(target: self) { (self, result) in
         print(result)
-    })
+    }
 }
 
 func cancelSubscription() {
@@ -289,9 +289,9 @@ By default, a subscriber's handler is executed on the thread that triggers the E
 
 ```swift
 // This executes the subscriber's handler on the main queue
-someEvent.addSubscriber(target: self, queue: .main, handler: { (self, data) in
+someEvent.addSubscriber(target: self, queue: .main) { (self, data) in
     self.updateUI(data)
-})
+}
 ```
 
 #### One-time notification
@@ -300,10 +300,10 @@ To remove a subscriber from the Event subscribers after a single notification:
 
 ```swift
 // The handler of this subscriber will be executed only once
-someEvent.addSubscriber(target: self, handler: { (self, data) in
+someEvent.addSubscriber(target: self) { (self, data) in
     self.useData(data)
     self.someEvent.removeSubscriber(target: self)
-})
+}
 ```
 
 License
