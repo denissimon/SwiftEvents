@@ -1,23 +1,31 @@
 SwiftEvents
 ===========
 
-[![Swift](https://img.shields.io/badge/Swift-5.3-orange.svg?style=flat)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-5.5-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
-SwiftEvents is a lightweight library for creating and observing events. It's type safe, thread safe and with memory safety. It has functionality of `delegation`, `NotificationCenter`, `key-value observing (KVO)` and `bindings` in one simple API.
+SwiftEvents is a lightweight library for creating and observing events.
+
+It includes:
+* `Observable<T>` for data binding that can be used in MVVM. Observable is implemented using Event class.
+* `Event<T>` for closure based delegation and one-to-many notifications.
 
 Features:
 
-- [x] Type Safety: the concrete type value is delivered to the subscriber without the need for downcasting
+- [x] Type safety: the concrete type value is delivered to the subscriber without the need for downcasting
 
-- [x] Thread Safety: you can `addSubscriber`, `trigger`, `removeSubscriber` from any thread without issues
+- [x] Thread safety: you can `subscribe` / `bind`, `trigger`, `unsubscribe` / `unbind` from any thread without issues such as data races
 
-- [x] Memory Safety: automatic preventing retain cycles and memory leaks (with no need to specify `[weak self]` in closures); as well as automatic removal of subscribers when they are deallocated 
+- [x] Memory safety: automatic preventing retain cycles, without strictly having to specify `[weak self]` in closure when subscribing/binding. Whether you specified `[weak self]` or not, it’s sometimes forgotten to specify - safety against memory leaks will be ensured automatically. As well as automatic removal of subscribers/observers when they are deallocated
 
 - [x] Comprehensive unit test coverage
 
 Installation
 ------------
+
+#### Manual
+
+Copy `SwiftEvents.swift` into your project.
 
 #### CocoaPods
 
@@ -45,16 +53,63 @@ dependencies: [
 ]
 ```
 
-#### Manual
-
-Copy `SwiftEvents.swift` into your project.
-
 Usage
 -----
 
-### Delegation functionality
+### Data binding
 
-With SwiftEvents, such a `one-to-one` connection can be done in just two steps:
+1. Replace the `Type` of property to observe with the `Observable<Type>`
+2. Bind to the Observable
+
+Example:
+
+```swift
+class ViewModel {
+    
+    var infoLabel: Observable<String> = Observable("init value")
+
+    func set(newValue: String) {
+        infoLabel.value = newValue
+    }
+}
+```
+
+```swift
+class View: UIViewController {
+    
+    var viewModel = ViewModel()
+
+    @IBOutlet weak var infoLabel: UILabel!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        infoLabel.text = viewModel.infoLabel.value
+        
+        viewModel.infoLabel.bind(self) { (self, value) in self.updateInfoLabel(value) }
+    }
+
+    private func updateInfoLabel(_ value: String) {
+        infoLabel.text = value
+    }
+}
+```
+
+Note: here a capture list is intentionally not specified in closure before `(self, value)` because under the hood SwiftEvents will construct a new closure with `[weak target]` included there. This way a strong reference cycle will be avoided.
+
+In the above example, every time ViewModel changes the value of the observable property `infoLabel`, View is notified and updates the `infoLabel.text`.
+
+You can use the infix operator <<< to set a new value for an observable property:
+
+```swift
+infoLabel <<< newValue
+```
+
+An Observable can have multiple observers, and when the property's value is updated, all of them will be notified.
+
+### Delegation
+
+Delegation can be implemented not only using protocols, but also based on closure. Such a one-to-one connection can be done in two steps:
 
 1. Create an Event for the publisher
 2. Subscribe to the Event
@@ -62,61 +117,45 @@ With SwiftEvents, such a `one-to-one` connection can be done in just two steps:
 Example:
 
 ```swift
-import Foundation
-import SwiftEvents
-
-// The publisher
 class MyModel {
     
-    let didDownloadEvent = Event<UIImage?>()
+    let didDownload = Event<UIImage?>()
     
     func downloadImage(for url: URL) {
-        download(url: url) { image in
-            self.didDownloadEvent.trigger(image)
+        service.download(url: url) { [weak self] image in
+            self?.didDownload.trigger(image)
         }
     }
 }
 ```
 
 ```swift
-import UIKit
-
-// The subscriber
 class MyViewController: UIViewController {
 
     let model = MyModel()
-    
+    var image: UIImage?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        model.didDownloadEvent.addSubscriber(target: self) { (self, image) in
-            if let image = image {
-                self.performUpdate(image)
-            }
-        }
+        model.didDownload.subscribe(self) { (self, image) in self.updateImage(image) }
     }
     
-    func updateImage() {
-        model.downloadImage(for: /* image url */)
+    private func updateImage(_ image: UIImage?) {
+        self.image = image
     }
 }
 ```
 
-You can use the Event with any complex type, including multiple values like `(UIImage, Int)?`. You can also create several events (didDownloadEvent, onHTTPErrorEvent, etc), and trigger only what is needed.
+You can use Event with any complex type, including custom types and multiple values like `(UIImage, Int)?`. You can also create several events (didDownload, onNetworkError etc), and trigger only what is needed.
 
-### NotificationCenter functionality
+### Notifications
 
-If notifications must be `one-to-many`, or two objects that need to be connected are too far apart, SwiftEvents can be used in three steps:
-
-1. Create an EventService
-2. Create Events which will be held by EventService
-3. Subscribe to the appropriate Event
+If notifications must be one-to-many, or two objects that need to be connected are too far apart, SwiftEvents can be used like NotificationCenter:
 
 Example:
 
 ```swift
-import SwiftEvents
-
 public class EventService {
     
     public static let get = EventService()
@@ -129,10 +168,9 @@ public class EventService {
 ```
 
 ```swift
-class Controller1 {
-    
+class Controller1 {    
     init() {
-        EventService.get.onDataUpdate.addSubscriber(target: self) { (self, data) in
+        EventService.get.onDataUpdate.subscribe(self) { (self, data) in
             print("Controller1: '\(data)'")
         }
     }
@@ -141,9 +179,8 @@ class Controller1 {
 
 ```swift
 class Controller2 {
-    
     init() {
-        EventService.get.onDataUpdate.addSubscriber(target: self) { (self, data) in
+        EventService.get.onDataUpdate.subscribe(self) { (self, data) in
             print("Controller2: '\(data)'")
         }
     }
@@ -175,101 +212,36 @@ pub.requestData()
 // => Controller2: 'some data'
 ```
 
-### KVO and bindings functionality
+### Other examples
 
-Just two steps again:
+More examples of using SwiftEvents can be found in [SwiftEventsTests.swift](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/SwiftEventsTests.swift) and in this [demo app](https://github.com/denissimon/ImageSearch).
 
-1. Replace the `Type` of property to observe with the `Observable<Type>`
-2. Subscribe to the `didChanged` Event
+### Advanced features
 
-Example:
-
-```swift
-import Foundation
-import SwiftEvents
-
-class ViewModel {
-    
-    var infoLabel: Observable<String>
-
-    init() {
-        infoLabel = Observable<String>("last saved value")
-    }
-
-    func set(newValue: String) {
-        infoLabel.value = newValue
-    }
-}
-```
+#### Manual removal of a subscriber / observer
 
 ```swift
-import UIKit
+someEvent.subscribe(self) { (self, value) in self.setValue(value) }
+someEvent.unsubscribe(self)
 
-class View: UIViewController {
-    
-    var viewModel = ViewModel()
-
-    @IBOutlet weak var infoLabel: UILabel!
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        infoLabel.text = viewModel.infoLabel.value
-        
-        viewModel.infoLabel.didChanged.addSubscriber(target: self) { (self, value) in
-            self.infoLabel.text = value.new
-        }
-    }
-}
+someObservable.bind(self) { (self, value) in self.setValue(value) }
+someObservable.unbind(self)
 ```
 
-In this MVVM example, every time the ViewModel changes the value of observable property `infoLabel`, the View is notified with new and old values and updates the `infoLabel.text`.
-
-You can use the infix operator <<< to set a new value for an observable property:
+#### Removal of all subscribers / observers
 
 ```swift
-infoLabel <<< newValue
+someEvent.unsubscribeAll()
+someObservable.unbindAll()
 ```
 
-Properties of any class or struct can be observable.
-
-### Advanced topics
-
-#### Manual removal of a subscriber
-
-A subscriber can be removed from the Event subscribers manually:
-
-```swift
-func startSubscription() {
-    someEvent.addSubscriber(target: self) { (self, result) in
-        print(result)
-    }
-}
-
-func cancelSubscription() {
-    someEvent.removeSubscriber(target: self)
-}
-```
-
-#### Removal of all subscribers
-
-To remove all Event subscribers:
-
-```swift
-someEvent.removeAllSubscribers()
-```
-
-#### subscribersCount
-
-To get the number of subscribers to the Event:
+#### The number of subscribers to the Event
 
 ```swift
 let subscribersCount = someEvent.subscribersCount
 ```
 
-#### triggersCount
-
-To get the number of times the Event has been triggered:
+#### The number of times the Event was triggered
 
 ```swift
 let triggersCount = someEvent.triggersCount
@@ -277,34 +249,48 @@ let triggersCount = someEvent.triggersCount
 
 #### Reset of triggersCount
 
-To reset the number of times the Event has been triggered:
-
 ```swift
 someEvent.resetTriggersCount()
 ```
 
 #### queue: DispatchQueue
 
-By default, a subscriber's handler is executed on the thread that triggers the Event. To change the default behaviour, you can set this parameter when adding a subscriber:
+By default, the provided handler is executed on the thread that triggers the Event / Observable. To change this default behaviour, you can set this parameter when subscribing/binding:
 
 ```swift
-// This executes the subscriber's handler on the main queue
-someEvent.addSubscriber(target: self, queue: .main) { (self, data) in
-    self.updateUI(data)
-}
+// This executes the handler on the main queue
+someEvent.subscribe(self, queue: .main) { (self, image) in self.updateImage(image) }
+someObservable.bind(self, queue: .main) { (self, image) in self.updateImage(image) }
 ```
 
 #### One-time notification
 
-To remove a subscriber from the Event subscribers after a single notification:
+To make the handler execute only once:
 
 ```swift
-// The handler of this subscriber will be executed only once
-someEvent.addSubscriber(target: self) { (self, data) in
+someObservable.bind(self) { (self, data) in
     self.useData(data)
-    self.someEvent.removeSubscriber(target: self)
+    self.someObservable.unbind(self)
 }
 ```
+
+#### N-time notifications
+
+To make the handler execute N times:
+
+```swift
+let n = 5
+someEvent.subscribe(self) { (self, data) in
+    self.useData(data)
+    if self.someEvent.triggersCount == n {
+        self.someEvent.unsubscribe(self)
+    }
+}
+```
+
+#### Alias methods 
+
+There are alias methods for Event `addSubscriber`, `removeSubscriber` and `removeAllSubscribers`, which do the same thing as `subscribe`, `unsubscribe` and `unsubscribeAll` respectively.
 
 License
 -------
