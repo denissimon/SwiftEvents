@@ -11,50 +11,55 @@ import Foundation
 import Dispatch
 #endif
 
-/// A type-safe Event with built-in security.
+/// A type-safe Event with built-in thread and memory safety
 final public class Event<T> {
     
     private var subscribers = [EventSubscription<T>]()
     
     private let notificationQueue = DispatchQueue(label: "com.swift.events.dispatch.queue", attributes: .concurrent)
     
-    /// The number of subscribers to the Event.
+    /// The number of subscribers to the Event
     public var subscribersCount: Int {
         return getSubscribers().count
     }
     
-    /// The number of times the Event has been triggered.
     private var _triggersCount = Int()
     
+    /// The number of times the Event was triggered
     public var triggersCount: Int {
         return getTriggersCount()
     }
     
     public init() {}
     
-    /// Adds a new Event subscriber.
+    /// Subscribes to the Event
     ///
-    /// - Parameter target: The target object that subscribes to the Event.
-    /// - Parameter queue: The queue in which the handler should be executed when the Event triggers.
-    /// - Parameter handler: The closure you want executed when the Event triggers.
-    public func addSubscriber<O: AnyObject>(target: O, queue: DispatchQueue? = nil, handler: @escaping (O, T) -> ()) {
+    /// - Parameter target: The target object that subscribes to the Event
+    /// - Parameter queue: The queue in which the handler should be executed when the Event triggers
+    /// - Parameter handler: The closure you want executed when the Event triggers
+    public func subscribe<O: AnyObject>(_ target: O, queue: DispatchQueue? = nil, handler: @escaping (O, T) -> ()) {
         
-        let magicHandler: (T) -> () = { [weak target] data in
+        let constructedClosure: (T) -> () = { [weak target] data in
             if let target = target {
                 handler(target, data)
             }
         }
         
-        let wrapper = EventSubscription(target: target, queue: queue, handler: magicHandler)
+        let wrapper = EventSubscription(target: target, queue: queue, handler: constructedClosure)
         
         notificationQueue.async(flags: .barrier) {
             self.subscribers.append(wrapper)
         }
     }
     
-    /// Triggers the Event, calls all handlers.
+    /// Alias for 'subscribe'
+    public func addSubscriber<O: AnyObject>(_ target: O, queue: DispatchQueue? = nil, handler: @escaping (O, T) -> ()) {
+        subscribe(target, queue: queue, handler: handler)
+    }
+    
+    /// Triggers the Event, calls all handlers
     ///
-    /// - Parameter data: The data to trigger the Event with.
+    /// - Parameter data: The data to trigger the Event with
     public func trigger(_ data: T) {
         notificationQueue.async(flags: .barrier) {
             self._triggersCount += 1
@@ -66,13 +71,13 @@ final public class Event<T> {
             if subscriber.target != nil {
                 callHandler(on: subscriber.queue, data: data, handler: subscriber.handler)
             } else {
-                // Removes the subscriber when it is deallocated.
-                removeSubscriber(id: subscriber.id)
+                // Removes the subscriber when it is deallocated
+                unsubscribe(id: subscriber.id)
             }
         }
     }
     
-    /// Executes the handler with the provided data and parameters.
+    /// Executes the handler with provided data and parameters
     private func callHandler(on queue: DispatchQueue?, data: T, handler: @escaping (T) -> ()) {
         guard let queue = queue else {
             handler(data)
@@ -83,30 +88,40 @@ final public class Event<T> {
         }
     }
     
-    /// Removes a specific subscriber from the Event subscribers.
+    /// Unsubscribes from the Event
     ///
-    /// - Parameter id: The id of the subscriber.
-    private func removeSubscriber(id: ObjectIdentifier) {
+    /// - Parameter id: The id of the subscriber
+    private func unsubscribe(id: ObjectIdentifier) {
         notificationQueue.async(flags: .barrier) {
             self.subscribers = self.subscribers.filter { $0.id != id }
         }
     }
     
-    /// Removes a specific subscriber from the Event subscribers.
+    /// Unsubscribes from the Event
     ///
-    /// - Parameter target: The target object that subscribes to the Event.
-    public func removeSubscriber(target: AnyObject) {
-        removeSubscriber(id: ObjectIdentifier(target))
+    /// - Parameter target: The target object that subscribes to the Event
+    public func unsubscribe(_ target: AnyObject) {
+        unsubscribe(id: ObjectIdentifier(target))
     }
     
-    /// Removes all subscribers on this instance.
-    public func removeAllSubscribers() {
+    /// Alias for 'unsubscribe'
+    public func removeSubscriber(_ target: AnyObject) {
+        unsubscribe(target)
+    }
+    
+    /// Unsubscribes all subscribers from the Event
+    public func unsubscribeAll() {
         notificationQueue.async(flags: .barrier) {
             self.subscribers.removeAll()
         }
     }
     
-    /// Resets the number of times the Event has been triggered.
+    /// Alias for 'unsubscribeAll'
+    public func removeAllSubscribers() {
+        unsubscribeAll()
+    }
+    
+    /// Resets the number of times the Event was triggered
     public func resetTriggersCount() {
         notificationQueue.async(flags: .barrier) {
             self._triggersCount = 0
@@ -130,8 +145,8 @@ final public class Event<T> {
     }
 }
 
-/// Wrapper that contains information related to a subscription.
-fileprivate struct EventSubscription<T> {
+/// Wrapper that contains information related to a subscription
+fileprivate struct EventSubscription<T>: Identifiable {
     weak var target: AnyObject?
     let queue: DispatchQueue?
     let handler: (T) -> ()
@@ -145,22 +160,44 @@ fileprivate struct EventSubscription<T> {
     }
 }
 
-/// For KVO and bindings functionality.
+/// Data binding
 final public class Observable<T> {
-    public let didChanged = Event<(new: T, old: T)>()
+    
+    private let didChanged = Event<T>()
     
     public var value: T {
         didSet {
-            didChanged.trigger((new: value, old: oldValue))
+            didChanged.trigger(value)
         }
     }
     
     public init(_ v: T) {
         value = v
     }
+    
+    /// Binds to the Observable
+    ///
+    /// - Parameter target: The target object that binds to the Observable
+    /// - Parameter queue: The queue in which the handler should be executed when the Observable's value changes
+    /// - Parameter handler: The closure you want executed when the Observable's value changes
+    public func bind<O: AnyObject>(_ target: O, queue: DispatchQueue? = nil, handler: @escaping (O, T) -> ()) {
+        didChanged.addSubscriber(target, queue: queue, handler: handler)
+    }
+    
+    /// Unbinds from the Observable
+    ///
+    /// - Parameter target: The target object that binds to the Observable
+    public func unbind(_ target: AnyObject) {
+        didChanged.removeSubscriber(target)
+    }
+    
+    /// Unbinds all observers from the Observable
+    public func unbindAll() {
+        didChanged.removeAllSubscribers()
+    }
 }
 
-/// Helper operator to trigger Event data.
+/// Helper operator to set a new value for an Observable
 infix operator <<<
 public func <<< <T> (left: Observable<T>, right: @autoclosure () -> T) {
     left.value = right()
