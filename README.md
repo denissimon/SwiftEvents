@@ -18,21 +18,17 @@ Features:
 
 - [x] Memory safety: automatic preventing retain cycles, without strictly having to specify `[weak self]` in closure when subscribing/binding. Whether you specified `[weak self]` or not, it’s sometimes forgotten to specify - safety against memory leaks will be ensured automatically. As well as automatic removal of subscribers/observers when they are deallocated
 
-- [x] Comprehensive unit test coverage
+- [x] Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/SwiftEventsTests.swift) coverage.
 
 Installation
 ------------
-
-#### Manual
-
-Copy `SwiftEvents.swift` into your project.
 
 #### CocoaPods
 
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 1.1.1'
+pod 'SwiftEvents', '~> 1.2'
 ```
 
 #### Carthage
@@ -49,9 +45,13 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.1.1")
+    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.2")
 ]
 ```
+
+#### Manually
+
+Copy `SwiftEvents.swift` into your project.
 
 Usage
 -----
@@ -105,7 +105,7 @@ You can use the infix operator <<< to set a new value for an observable property
 infoLabel <<< newValue
 ```
 
-An Observable can have multiple observers, and when the property's value is updated, all of them will be notified.
+As with Event, an Observable can have multiple observers.
 
 ### Delegation
 
@@ -147,11 +147,11 @@ class MyViewController: UIViewController {
 }
 ```
 
-You can use Event with any complex type, including custom types and multiple values like `(UIImage, Int)?`. You can also create several events (didDownload, onNetworkError etc), and trigger only what is needed.
+You can use Event with any complex type, including custom types and multiple values like `(UIImage, Int)`. You can also create several events (didDownload, onNetworkError etc), and trigger only what is needed.
 
 ### Notifications
 
-If notifications must be one-to-many, or two objects that need to be connected are too far apart, SwiftEvents can be used like NotificationCenter:
+If notifications must be one-to-many, or two objects that need to be connected are too far apart, SwiftEvents can be used like NotificationCenter.
 
 Example:
 
@@ -161,8 +161,7 @@ public class EventService {
     public static let get = EventService()
     
     private init() {}
-    
-    // Events
+
     public let onDataUpdate = Event<String?>()
 }
 ```
@@ -188,17 +187,11 @@ class Controller2 {
 ```
 
 ```swift
-class DataModel {
-    
-    private(set) var data: String? {
-        didSet {
-            EventService.get.onDataUpdate.trigger(data)
-        }
-    }
-    
+class DataModel {    
     func requestData() {
         // requesting code goes here
         data = "some data"
+        EventService.get.onDataUpdate.trigger(data)
     }
 }
 ```
@@ -212,9 +205,9 @@ pub.requestData()
 // => Controller2: 'some data'
 ```
 
-### Other examples
+### More examples
 
-More examples of using SwiftEvents can be found in [SwiftEventsTests.swift](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/SwiftEventsTests.swift) and in this [demo app](https://github.com/denissimon/ImageSearch).
+More usage examples can be found in this [demo app](https://github.com/denissimon/ImageSearch).
 
 ### Advanced features
 
@@ -265,7 +258,7 @@ someObservable.bind(self, queue: .main) { (self, image) in self.updateImage(imag
 
 #### One-time notification
 
-To make the handler execute only once:
+To ensure that the handler will be executed only once:
 
 ```swift
 someObservable.bind(self) { (self, data) in
@@ -276,21 +269,14 @@ someObservable.bind(self) { (self, data) in
 
 #### N-time notifications
 
-To make the handler execute N times:
+To ensure that the handler will be executed no more than `n` times:
 
 ```swift
-let n = 5
 someEvent.subscribe(self) { (self, data) in
     self.useData(data)
-    if self.someEvent.triggersCount == n {
-        self.someEvent.unsubscribe(self)
-    }
+    if self.someEvent.triggersCount == n { self.someEvent.unsubscribe(self) }
 }
 ```
-
-#### Alias methods 
-
-There are alias methods for Event `addSubscriber`, `removeSubscriber` and `removeAllSubscribers`, which do the same thing as `subscribe`, `unsubscribe` and `unsubscribeAll` respectively.
 
 License
 -------

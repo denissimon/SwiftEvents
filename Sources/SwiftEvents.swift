@@ -65,19 +65,19 @@ final public class Event<T> {
             self._triggersCount += 1
         }
         
-        let subscribersDict = getSubscribers()
+        let subscribers = getSubscribers()
         
-        for subscriber in subscribersDict {
+        for subscriber in subscribers {
             if subscriber.target != nil {
                 callHandler(on: subscriber.queue, data: data, handler: subscriber.handler)
             } else {
-                // Removes the subscriber when it is deallocated
+                // Removes the subscriber if it is deallocated
                 unsubscribe(id: subscriber.id)
             }
         }
     }
     
-    /// Executes the handler with provided data and parameters
+    /// Executes the handler with provided data
     private func callHandler(on queue: DispatchQueue?, data: T, handler: @escaping (T) -> ()) {
         guard let queue = queue else {
             handler(data)
