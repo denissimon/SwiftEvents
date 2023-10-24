@@ -11,10 +11,23 @@ import Foundation
 import Dispatch
 #endif
 
-/// A type-safe Event with built-in thread and memory safety
 final public class Event<T> {
     
-    private var subscribers = [EventSubscription<T>]()
+    fileprivate struct Subscriber<T>: Identifiable {
+        weak var target: AnyObject?
+        let queue: DispatchQueue?
+        let handler: (T) -> ()
+        let id: ObjectIdentifier
+        
+        init(target: AnyObject, queue: DispatchQueue?, handler: @escaping (T) -> ()) {
+            self.target = target
+            self.queue = queue
+            self.handler = handler
+            id = ObjectIdentifier(target)
+        }
+    }
+    
+    private var subscribers = [Subscriber<T>]()
     
     private let notificationQueue = DispatchQueue(label: "com.swift.events.dispatch.queue", attributes: .concurrent)
     
@@ -45,7 +58,7 @@ final public class Event<T> {
             }
         }
         
-        let wrapper = EventSubscription(target: target, queue: queue, handler: constructedClosure)
+        let wrapper = Subscriber(target: target, queue: queue, handler: constructedClosure)
         
         notificationQueue.async(flags: .barrier) {
             self.subscribers.append(wrapper)
@@ -128,8 +141,8 @@ final public class Event<T> {
         }
     }
     
-    private func getSubscribers() -> [EventSubscription<T>] {
-        var result = [EventSubscription<T>]()
+    private func getSubscribers() -> [Subscriber<T>] {
+        var result = [Subscriber<T>]()
         notificationQueue.sync {
             result = subscribers
         }
@@ -145,22 +158,6 @@ final public class Event<T> {
     }
 }
 
-/// Wrapper that contains information related to a subscription
-fileprivate struct EventSubscription<T>: Identifiable {
-    weak var target: AnyObject?
-    let queue: DispatchQueue?
-    let handler: (T) -> ()
-    let id: ObjectIdentifier
-    
-    init(target: AnyObject, queue: DispatchQueue?, handler: @escaping (T) -> ()) {
-        self.target = target
-        self.queue = queue
-        self.handler = handler
-        id = ObjectIdentifier(target)
-    }
-}
-
-/// Data binding
 final public class Observable<T> {
     
     private let didChanged = Event<T>()
