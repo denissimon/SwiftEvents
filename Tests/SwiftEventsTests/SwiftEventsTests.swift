@@ -28,7 +28,6 @@ class SwiftEventsTests: XCTestCase {
         observableString = Observable("")
         
         EventService.get.sharedEvent.unsubscribeAll()
-        EventService.get.sharedEvent.resetTriggersCount()
     }
     
     override func tearDown() {
@@ -39,15 +38,9 @@ class SwiftEventsTests: XCTestCase {
         var intEventResult: Int? = nil
         var stringEventResult: String? = nil
         
-        eventInt.subscribe(self) { (self, data) in
-            guard let data = data else { return }
-            intEventResult = data
-        }
+        eventInt.subscribe(self) { data in intEventResult = data }
         
-        eventString.subscribe(self) { (self, data) in
-            guard let data = data else { return }
-            stringEventResult = data
-        }
+        eventString.subscribe(self) { data in stringEventResult = data }
         
         eventInt.trigger(1)
         eventString.trigger("test")
@@ -59,7 +52,7 @@ class SwiftEventsTests: XCTestCase {
     func testTriggerNil() {
         var eventResult: Int? = nil
         
-        eventInt.subscribe(self) { (self, data) in eventResult = data }
+        eventInt.subscribe(self) { data in eventResult = data }
         
         eventInt.trigger(nil)
         
@@ -71,7 +64,7 @@ class SwiftEventsTests: XCTestCase {
         var intArgument: Int? = nil
         var stringArgument: String? = nil
         
-        eventMultiValues.subscribe(self) { (self, data) in
+        eventMultiValues.subscribe(self) { data in
             guard let data = data else { return }
             intArgument = data.0
             stringArgument = data.1
@@ -86,10 +79,7 @@ class SwiftEventsTests: XCTestCase {
     func testMultiTriggers() {
         var intEventResult: Int? = nil
         
-        eventInt.subscribe(self) { (self, data) in
-            guard let data = data else { return }
-            intEventResult = data
-        }
+        eventInt.subscribe(self) { data in intEventResult = data }
         
         eventInt.trigger(1)
         eventInt.trigger(5)
@@ -102,13 +92,13 @@ class SwiftEventsTests: XCTestCase {
         var intEventResult: Int? = nil
         var handledCount = 0
         
-        EventService.get.sharedEvent.subscribe(self) { (self, data) in
+        EventService.get.sharedEvent.subscribe(self) { data in
             guard let data = data else { return }
             intEventResult = data
             handledCount += 1
         }
         
-        EventService.get.sharedEvent.subscribe(self) { (self, data) in
+        EventService.get.sharedEvent.subscribe(self) { data in
             guard let data = data else { return }
             intEventResult = data + 1
             handledCount += 1
@@ -118,18 +108,17 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(intEventResult, 2)
         XCTAssertEqual(handledCount, 2)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 1)
     }
     
     func testRemoveSubscriber() {
         var handledCount = 0
         
-        eventInt.subscribe(self) { (self, data) in
+        eventInt.subscribe(self) { data in
             guard let data = data else { return }
             handledCount += data
         }
         
-        eventInt.subscribe(self) { (self, data) in
+        eventInt.subscribe(self) { data in
             guard let data = data else { return }
             handledCount += data
         }
@@ -154,7 +143,6 @@ class SwiftEventsTests: XCTestCase {
         EventService.get.sharedEvent.trigger(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 1)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 1)
         XCTAssertEqual(subscriber1.handledCount + subscriber2.handledCount, 1)
     }
     
@@ -162,8 +150,8 @@ class SwiftEventsTests: XCTestCase {
         var handledCount = 0
         
         // The handler of this subscriber will be executed only once
-        eventInt.subscribe(self) { (self, data) in
-            guard let data = data else { return }
+        eventInt.subscribe(self) { [weak self] data in
+            guard let self = self, let data = data else { return }
             self.eventInt.unsubscribe(self)
             handledCount += data
         }
@@ -182,8 +170,8 @@ class SwiftEventsTests: XCTestCase {
         let n = 3
         
         // The handler of this subscriber will be executed only 3 times
-        eventInt.subscribe(self) { (self, data) in
-            guard let data = data else { return }
+        eventInt.subscribe(self) { [weak self] data in
+            guard let self = self, let data = data else { return }
             if self.eventInt.triggersCount == n {
                 self.eventInt.unsubscribe(self)
             }
@@ -192,24 +180,24 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(eventInt.subscribersCount, 1)
         
-        for _ in 0...n {
+        for _ in 1...n*2 {
             eventInt.trigger(1)
         }
         
         XCTAssertEqual(eventInt.subscribersCount, 0)
-        XCTAssertEqual(eventInt.triggersCount, n+1)
+        XCTAssertEqual(eventInt.triggersCount, n*2)
         XCTAssertEqual(handledCount, n)
     }
     
     func testRemoveAllSubscribers() {
         var handledCount = 0
         
-        eventInt.subscribe(self) { (self, data) in
+        eventInt.subscribe(self) { data in
             guard let data = data else { return }
             handledCount += data
         }
         
-        eventInt.subscribe(self) { (self, data) in
+        eventInt.subscribe(self) { data in
             guard let data = data else { return }
             handledCount += data
         }
@@ -234,21 +222,20 @@ class SwiftEventsTests: XCTestCase {
         EventService.get.sharedEvent.trigger(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 1)
         XCTAssertEqual(subscriber1.handledCount + subscriber2.handledCount, 0)
     }
     
     func testRemoveAllSubscribersDuringTriggering() {
         var handledCount = 0
         
-        eventInt.subscribe(self) { (self, data) in
-            guard let data = data else { return }
+        eventInt.subscribe(self) { [weak self] data in
+            guard let self = self, let data = data else { return }
             self.eventInt.unsubscribeAll()
             handledCount += data
         }
         
-        eventInt.subscribe(self) { (self, data) in
-            guard let data = data else { return }
+        eventInt.subscribe(self) { [weak self] data in
+            guard let self = self, let data = data else { return }
             handledCount += data
         }
         
@@ -263,37 +250,19 @@ class SwiftEventsTests: XCTestCase {
     
     func testGetSubscribersCount() {
         for _ in 0...2 {
-            eventInt.subscribe(self) { (self, _) in }
+            eventInt.subscribe(self) { _ in }
         }
         XCTAssertEqual(eventInt.subscribersCount, 3)
     }
     
     func testGetTriggersCount() {
-        eventInt.subscribe(self) { (self, _) in }
+        eventInt.subscribe(self) { _ in }
         
         for _ in 0...2 {
             eventInt.trigger(1)
         }
         
         XCTAssertEqual(eventInt.triggersCount, 3)
-    }
-    
-    func testResetTriggersCount() {
-        let _ = Controller1()
-        let _ = Controller2()
-        
-        EventService.get.sharedEvent.trigger(1)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 1)
-        
-        EventService.get.sharedEvent.resetTriggersCount()
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 0)
-    }
-    
-    func testResetTriggersCountDuringTriggering() {
-        eventInt.subscribe(self) { (self, _) in self.eventInt.resetTriggersCount() }
-                
-        eventInt.trigger(1)
-        XCTAssertEqual(eventInt.triggersCount, 0)
     }
     
     func testTriggerFromDifferentThreads() {
@@ -307,14 +276,13 @@ class SwiftEventsTests: XCTestCase {
             EventService.get.sharedEvent.trigger(1)
         }
         
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 2)
         XCTAssertEqual(subscriber.handledCount, 2)
     }
     
     func testRemoveSubscriberFromBackgroundThread() {
         var handledCount = 0
         
-        eventInt.subscribe(self) { (self, data) in
+        eventInt.subscribe(self) { data in
             guard let data = data else { return }
             handledCount += data
         }
@@ -332,7 +300,7 @@ class SwiftEventsTests: XCTestCase {
         var handledCount = 0
         
         DispatchQueue.global(qos: .background).sync {
-            self.eventInt.subscribe(self) { (self, data) in
+            self.eventInt.subscribe(self) { data in
                 guard let data = data else { return }
                 handledCount += data
             }
@@ -351,7 +319,7 @@ class SwiftEventsTests: XCTestCase {
         
         var handledCount = 0
         
-        eventInt.subscribe(self, queue: .global(qos: .background)) { (self, data) in
+        eventInt.subscribe(self, queue: .global(qos: .background)) { data in
             XCTAssertEqual(Thread.isMainThread, false)
             guard let data = data else { return }
             handledCount += data
@@ -360,7 +328,7 @@ class SwiftEventsTests: XCTestCase {
             }
         }
         
-        eventInt.subscribe(self, queue: .global(qos: .background)) { (self, data) in
+        eventInt.subscribe(self, queue: .global(qos: .background)) { data in
             XCTAssertEqual(Thread.isMainThread, false)
             guard let data = data else { return }
             handledCount += data
@@ -378,7 +346,7 @@ class SwiftEventsTests: XCTestCase {
         
         var handledCount = 0
         
-        eventInt.subscribe(self, queue: .main) { (self, data) in
+        eventInt.subscribe(self, queue: .main) { data in
             XCTAssertEqual(Thread.isMainThread, true)
             guard let data = data else { return }
             handledCount += data
@@ -387,7 +355,7 @@ class SwiftEventsTests: XCTestCase {
             }
         }
         
-        eventInt.subscribe(self, queue: .main) { (self, data) in
+        eventInt.subscribe(self, queue: .main) { data in
             XCTAssertEqual(Thread.isMainThread, true)
             guard let data = data else { return }
             handledCount += data
@@ -405,13 +373,13 @@ class SwiftEventsTests: XCTestCase {
         
         var handledCount = 0
         
-        eventInt.subscribe(self, queue: queue) { (self, data) in
+        eventInt.subscribe(self, queue: queue) { data in
             XCTAssertEqual(Thread.isMainThread, false)
             guard let data = data else { return }
             handledCount += data
         }
         
-        eventInt.subscribe(self, queue: queue) { (self, data) in
+        eventInt.subscribe(self, queue: queue) { data in
             XCTAssertEqual(Thread.isMainThread, false)
             guard let data = data else { return }
             handledCount += data
@@ -429,7 +397,7 @@ class SwiftEventsTests: XCTestCase {
         
         let promise = expectation(description: "In the handler")
         
-        eventInt.subscribe(self) { (self, data) in
+        eventInt.subscribe(self) { data in
             guard let data = data else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 handledCount = data
@@ -457,7 +425,7 @@ class SwiftEventsTests: XCTestCase {
     func testBindToObservable() {
         var handledCount = 0
         
-        observableString.bind(self) { (self, _) in handledCount += 1 }
+        observableString.bind(self) { _ in handledCount += 1 }
         
         observableString.value = "value1"
         observableString <<< "value2"
@@ -469,7 +437,7 @@ class SwiftEventsTests: XCTestCase {
     func testUnbindFromObservable() {
         var handledCount = 0
         
-        observableString.bind(self) { (self, _) in handledCount += 1 }
+        observableString.bind(self) { _ in handledCount += 1 }
         
         observableString.unbind(self)
         
@@ -482,8 +450,8 @@ class SwiftEventsTests: XCTestCase {
     func testUnbindAllFromObservable() {
         var handledCount = 0
         
-        observableString.bind(self) { (self, _) in handledCount += 1 }
-        observableString.bind(self) { (self, _) in handledCount += 1 }
+        observableString.bind(self) { _ in handledCount += 1 }
+        observableString.bind(self) { _ in handledCount += 1 }
         observableString.value = "value1"
         
         XCTAssertEqual(handledCount, 2)
@@ -501,7 +469,7 @@ class SwiftEventsTests: XCTestCase {
         self.measure() {
             var handledCount = 0
             for _ in 0..<10 {
-                eventMultiValues.subscribe(self) { (self, data) in
+                eventMultiValues.subscribe(self) { data in
                     guard let data = data else { return }
                     handledCount += data.0
                 }

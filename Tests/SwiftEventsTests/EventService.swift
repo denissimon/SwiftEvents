@@ -14,7 +14,6 @@ public class EventService {
     
     private init() {}
     
-    // Events
     public let sharedEvent = Event<Int?>()
 }
 
@@ -23,7 +22,9 @@ public class Controller1 {
     var handledCount = 0
     
     init() {
-        EventService.get.sharedEvent.subscribe(self) { (self, _) in self.handledCount += 1 }
+        EventService.get.sharedEvent.subscribe(self) { [weak self] _ in
+            self?.handledCount += 1
+        }
     }
 }
 
@@ -32,6 +33,8 @@ public class Controller2 {
     var handledCount = 0
     
     init() {
-        EventService.get.sharedEvent.subscribe(self) { (self, _) in self.handledCount += 1 }
+        EventService.get.sharedEvent.subscribe(self) { [weak self] _ in
+            self?.handledCount += 1
+        }
     }
 }
