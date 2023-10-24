@@ -8,9 +8,9 @@ SwiftEvents is a lightweight library for creating and observing events.
 
 It includes:
 * `Observable<T>` for data binding that can be particularly used in MVVM. Observable is implemented using the Event class.
-* `Event<T>` for any notifications, including one-to-many, closure based delegation, NotificationCenter-like implementation, etc.
+* `Event<T>` for any notifications, including one-to-many, closure-based delegation, NotificationCenter-like implementation, etc.
 
-SwiftEvents is a thread-safe, so its properties and methods, e.g. `subscribe` / `bind`, `trigger`, `unsubscribe` / `unbind`, can be safely called by multiple threads at the same time.
+SwiftEvents is thread-safe, so its properties and methods, e.g. `subscribe` / `bind`, `trigger`, `unsubscribe` / `unbind`, can be safely called by multiple threads at the same time.
 
 Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/SwiftEventsTests.swift) coverage.
 
@@ -22,7 +22,7 @@ Installation
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 1.2.1'
+pod 'SwiftEvents', '~> 1.3.0'
 ```
 
 #### Carthage
@@ -39,7 +39,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.2.1")
+    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.3.0")
 ]
 ```
 
@@ -100,7 +100,7 @@ infoLabel <<< newValue
 
 ### Notifications
 
-Using `Event<T>`, any one-to-one or one-to-many notifications can be implemented. Here is, for example, an implementation of closure based delegation pattern:
+Using `Event<T>`, any one-to-one or one-to-many notifications can be implemented. Here is, for example, an implementation of closure-based delegation pattern:
 
 ```swift
 class MyModel {
