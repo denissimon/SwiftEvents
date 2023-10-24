@@ -1,7 +1,7 @@
 SwiftEvents
 ===========
 
-[![Swift](https://img.shields.io/badge/Swift-5.5-orange.svg?style=flat)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
 SwiftEvents is a lightweight library for creating and observing events.
@@ -39,13 +39,13 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.2.1")
+    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.2.1")
 ]
 ```
 
 #### Manually
 
-Copy `SwiftEvents.swift` into your project.
+Just drag `SwiftEvents.swift` to the project tree.
 
 Usage
 -----
