@@ -7,10 +7,12 @@ SwiftEvents
 SwiftEvents is a lightweight library for creating and observing events.
 
 It includes:
-* `Observable<T>` for data binding that can be particularly used in MVVM. Observable is implemented using the Event class.
-* `Event<T>` for any notifications, including one-to-many, closure-based delegation, NotificationCenter-like implementation, etc.
+* `Observable<T>` for data binding that can be particularly used in MVVM. Implemented using the Event class.
+* `Event<T>` for any pub/sub notifications, including one-to-many with multiple subsribers.
 
-SwiftEvents is thread-safe, so its properties and methods, e.g. `subscribe` / `bind`, `trigger`, `unsubscribe` / `unbind`, can be safely called by multiple threads at the same time.
+SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, its properties and methods can be safely called by multiple threads at the same time.
+
+Another important feature is the automatic removal of subscribers/observers when they are deallocated.
 
 Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/SwiftEventsTests.swift) coverage.
 
@@ -45,12 +47,12 @@ dependencies: [
 
 #### Manually
 
-Just drag `SwiftEvents.swift` to the project tree.
+Copy `SwiftEvents.swift` into your project.
 
 Usage
 -----
 
-### Data binding
+### Observable
 
 Example:
 
@@ -90,17 +92,18 @@ class View: UIViewController {
 
 In this example, every time the ViewModel changes the value of the observable property `items` or `infoLabel`, the View is notified and updates its UI.
 
-As with Event, you can use Observable with any complex type, including custom types, such as `Observable<LoginResult?>`, and multiple values such as `Observable<(UIImage, Int)>`. As with Event, an Observable can have multiple observers.
+As with Event, an Observable can have multiple observers.
 
 The infix operator <<< can be used to set a new value for an observable property:
 
 ```swift
+infoLabel.value = newValue
 infoLabel <<< newValue
 ```
 
-### Notifications
+### Event
 
-Using `Event<T>`, any one-to-one or one-to-many notifications can be implemented. Here is, for example, an implementation of closure-based delegation pattern:
+An example implementation of the closure-based delegation pattern:
 
 ```swift
 class MyModel {
@@ -134,69 +137,19 @@ class MyViewController: UIViewController {
 
 You can also create several events (didDownload, onNetworkError etc), and trigger only what is needed.
 
-### NotificationCenter-like
-
-If notifications must be one-to-many, or two objects that need to be connected are too far apart, SwiftEvents can be used like NotificationCenter.
-
-Example:
-
-```swift
-public class EventService {
-    
-    public static let get = EventService()
-    
-    private init() {}
-    
-    public let onDataUpdate = Event<String?>()
-}
-```
-
-```swift
-class Controller1 {    
-    init() {
-        EventService.get.onDataUpdate.subscribe(self) { _ in
-            print("Controller1: '\(data)'")
-        }
-    }
-}
-```
-
-```swift
-class Controller2 {
-    init() {
-        EventService.get.onDataUpdate.subscribe(self) { _ in
-            print("Controller2: '\(data)'")
-        }
-    }
-}
-```
-
-```swift
-class DataModel {
-    func requestData() {
-        // requesting code goes here
-        data = "some data"
-        EventService.get.onDataUpdate.trigger(data)
-    }
-}
-```
-
-```swift
-let sub1 = Controller1()
-let sub2 = Controller2()
-let pub = DataModel()
-pub.requestData()
-// => Controller1: 'some data'
-// => Controller2: 'some data'
-```
+Event and Observable classes conform to `Unsubscribable` and `Unbindable` protocols respectively, which allows to pass a reference to an object that should only call `unsubscribe` / `unbind`.
 
 ### More examples
 
-More usage examples can be found in this [demo app](https://github.com/denissimon/ImageSearch).
+More usage examples can be found in this [demo app](https://github.com/denissimon/ImageSearch). 
+
+Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/EventService.swift) contains a NotificationCenter-like implementation.
 
 ### Advanced features
 
-#### Manual removal of a subscriber / observer
+#### Removal of a subscriber / observer
+
+SwiftEvents automatically removes subscribers/observers when they are deallocated. But they also can be removed manually:
 
 ```swift
 someEvent.subscribe(self) { [weak self] in self?.setValue($0) }
@@ -229,7 +182,7 @@ someObservable.triggersCount
 
 #### queue: DispatchQueue
 
-By default, the provided handler is executed on the thread that triggers the Event / Observable. To change this default behaviour, you can set this parameter when subscribing/binding:
+By default, the provided handler is executed on the thread that triggers the Event / Observable. To change this default behaviour:
 
 ```swift
 // This executes the handler on the main queue
