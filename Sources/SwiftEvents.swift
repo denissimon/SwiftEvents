@@ -49,6 +49,7 @@ final public class Event<T> {
     /// - Parameter queue: The queue in which the handler should be executed when the Event triggers
     /// - Parameter handler: The closure you want executed when the Event triggers
     public func subscribe<O: AnyObject>(_ target: O, queue: DispatchQueue? = nil, handler: @escaping (T) -> ()) {
+        if !subscribers.isEmpty { checkDeallocated() }
         let subscriber = Subscriber(target: target, queue: queue, handler: handler)
         notificationQueue.async(flags: .barrier) {
             self.subscribers.append(subscriber)
@@ -118,6 +119,15 @@ final public class Event<T> {
             result = _triggersCount
         }
         return result
+    }
+    
+    private func checkDeallocated() {
+        let subscribers = getSubscribers()
+        for subscriber in subscribers {
+            if subscriber.target == nil {
+                unsubscribe(id: subscriber.id)
+            }
+        }
     }
 }
 
