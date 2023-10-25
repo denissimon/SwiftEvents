@@ -14,7 +14,7 @@ SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` class
 
 Another important feature is the automatic removal of subscribers/observers when they are deallocated.
 
-Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/SwiftEventsTests.swift) coverage.
+Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests) coverage.
 
 Installation
 ------------
@@ -155,8 +155,8 @@ SwiftEvents automatically removes subscribers/observers when they are deallocate
 someEvent.subscribe(self) { [weak self] in self?.setValue($0) }
 someEvent.unsubscribe(self)
 
-someObservable.bind(self) { [weak self] in self.setValue($0) }
-someObservable.unbind(self)
+someObservable.bind(cell) { [weak cell] in cell?.update($0) }
+someObservable.unbind(cell)
 ```
 
 #### Removal of all subscribers / observers
