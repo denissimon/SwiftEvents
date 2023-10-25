@@ -11,6 +11,14 @@ import Foundation
 import Dispatch
 #endif
 
+protocol Unsubscribable: AnyObject {
+    func unsubscribe(_ target: AnyObject)
+}
+
+protocol Unbindable: AnyObject {
+    func unbind(_ target: AnyObject)
+}
+
 final public class Event<T> {
     
     struct Subscriber<T>: Identifiable {
@@ -139,6 +147,9 @@ infix operator <<<
 public func <<< <T> (left: Observable<T>, right: @autoclosure () -> T) {
     left.value = right()
 }
+
+extension Event: Unsubscribable {}
+extension Observable: Unbindable {}
 
 
 /* ****************** Thread-safe Event & Observable ****************** */
@@ -318,4 +329,7 @@ extension ObservableTS {
 public func <<< <T> (left: ObservableTS<T>, right: @autoclosure () -> T) {
     left.value = right()
 }
+
+extension EventTS: Unsubscribable {}
+extension ObservableTS: Unbindable {}
 
