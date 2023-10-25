@@ -1,5 +1,5 @@
 //
-//  SwiftEventsTests.swift
+//  SwiftEventsTSTests.swift
 //  https://github.com/denissimon/SwiftEvents
 //
 //  Created by Denis Simon on 05/29/2019.
@@ -12,22 +12,22 @@ import SwiftEvents
 import Dispatch
 #endif
 
-class SwiftEventsTests: XCTestCase {
+class SwiftEventsTSTests: XCTestCase {
     
-    var eventInt: Event<Int?> = Event()
-    var eventString: Event<String?> = Event()
-    var eventMultiValues: Event<(Int, String)?> = Event()
-    var observableString: Observable<String> = Observable("")
+    var eventInt: EventTS<Int?> = EventTS()
+    var eventString: EventTS<String?> = EventTS()
+    var eventMultiValues: EventTS<(Int, String)?> = EventTS()
+    var observableString: ObservableTS<String> = ObservableTS("")
     
     override func setUp() {
         super.setUp()
         
-        eventInt = Event()
-        eventString = Event()
-        eventMultiValues = Event()
-        observableString = Observable("")
+        eventInt = EventTS()
+        eventString = EventTS()
+        eventMultiValues = EventTS()
+        observableString = ObservableTS("")
         
-        EventService.get.sharedEvent.unsubscribeAll()
+        EventService.get.sharedEventTS.unsubscribeAll()
     }
     
     override func tearDown() {
@@ -138,19 +138,19 @@ class SwiftEventsTests: XCTestCase {
         var intEventResult: Int? = nil
         var callsCount = 0
         
-        EventService.get.sharedEvent.subscribe(self) { data in
+        EventService.get.sharedEventTS.subscribe(self) { data in
             guard let data = data else { return }
             intEventResult = data
             callsCount += 1
         }
         
-        EventService.get.sharedEvent.subscribe(self) { data in
+        EventService.get.sharedEventTS.subscribe(self) { data in
             guard let data = data else { return }
             intEventResult = data + 1
             callsCount += 1
         }
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.trigger(1)
         
         XCTAssertEqual(intEventResult, 2)
         XCTAssertEqual(callsCount, 2)
@@ -180,15 +180,15 @@ class SwiftEventsTests: XCTestCase {
     }
     
     func testUnsibscribeUsingEventService() {
-        let subscriber1 = Controller1()
-        let subscriber2 = Controller2()
+        let subscriber1 = ControllerTS1()
+        let subscriber2 = ControllerTS2()
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
         
-        EventService.get.sharedEvent.unsubscribe(subscriber1)
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.unsubscribe(subscriber1)
+        EventService.get.sharedEventTS.trigger(1)
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 1)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 1)
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount, 1)
     }
     
@@ -259,15 +259,15 @@ class SwiftEventsTests: XCTestCase {
     }
     
     func testUnsibscribeAllUsingEventService() {
-        let subscriber1 = Controller1()
-        let subscriber2 = Controller2()
+        let subscriber1 = ControllerTS1()
+        let subscriber2 = ControllerTS2()
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
         
-        EventService.get.sharedEvent.unsubscribeAll()
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.unsubscribeAll()
+        EventService.get.sharedEventTS.trigger(1)
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 0)
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount, 0)
     }
     
@@ -295,40 +295,40 @@ class SwiftEventsTests: XCTestCase {
     }
     
     func testOneTimeNotificationWithMultipleSubscribers() {
-        let subscriber1 = Controller1()
-        let subscriber3 = Controller3() // unsubscribe itself from the Event during triggering
-        let subscriber2 = Controller2()
+        let subscriber1 = ControllerTS1()
+        let subscriber3 = ControllerTS3() // unsubscribe itself from the Event during triggering
+        let subscriber2 = ControllerTS2()
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 3)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 3)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.trigger(1)
         
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount + subscriber3.callsCount, 3)
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.trigger(1)
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
         XCTAssertEqual(subscriber1.callsCount, 2)
         XCTAssertEqual(subscriber2.callsCount, 2)
         XCTAssertEqual(subscriber3.callsCount, 1)
     }
     
     func testUnsibscribeAllDuringTriggeringWithMultipleSubscribers() {
-        let subscriber1 = Controller1()
-        let subscriber4 = Controller4() // unsubscribe all subscribers from the Event during triggering
-        let subscriber2 = Controller2()
+        let subscriber1 = ControllerTS1()
+        let subscriber4 = ControllerTS4() // unsubscribe all subscribers from the Event during triggering
+        let subscriber2 = ControllerTS2()
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 3)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 3)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.trigger(1)
         
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount + subscriber4.callsCount, 3)
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 0)
         
         EventService.get.sharedEvent.trigger(1)
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 0)
         XCTAssertEqual(subscriber1.callsCount, 1)
         XCTAssertEqual(subscriber2.callsCount, 1)
         XCTAssertEqual(subscriber4.callsCount, 1)
@@ -354,14 +354,14 @@ class SwiftEventsTests: XCTestCase {
     }
     
     func testTriggerFromDifferentThreads() {
-        let subscriber = Controller1()
+        let subscriber = ControllerTS1()
         
         // Trigger from the main thread
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEventTS.trigger(1)
         
         DispatchQueue.global(qos: .background).sync {
             // Trigger from a background thread
-            EventService.get.sharedEvent.trigger(1)
+            EventService.get.sharedEventTS.trigger(1)
         }
         
         XCTAssertEqual(subscriber.callsCount, 2)
@@ -499,42 +499,42 @@ class SwiftEventsTests: XCTestCase {
     }
     
     func testAutoRemoveDeallocatedSubscribersAfterTrigger() {
-        // Controller1 subscribes to the sharedEvent during init()
-        var subscriber1: Controller1? = Controller1()
-        // Controller2 subscribes to the sharedEvent during init()
-        var subscriber2: Controller2? = Controller2()
+        // ControllerTS1 subscribes to the sharedEventTS during init()
+        var subscriber1: ControllerTS1? = ControllerTS1()
+        // ControllerTS2 subscribes to the sharedEventTS during init()
+        var subscriber2: ControllerTS2? = ControllerTS2()
         
-        EventService.get.sharedEvent.trigger(1) // a check is made for deallocated subscribers
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 1)
+        EventService.get.sharedEventTS.trigger(1) // a check is made for deallocated subscribers
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.triggersCount, 1)
         XCTAssertEqual(subscriber1?.callsCount, 1)
         XCTAssertEqual(subscriber2?.callsCount, 1)
         
         subscriber1 = nil
         
-        EventService.get.sharedEvent.trigger(1) // a check is made for deallocated subscribers
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 1)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 2)
+        EventService.get.sharedEventTS.trigger(1) // a check is made for deallocated subscribers
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 1)
+        XCTAssertEqual(EventService.get.sharedEventTS.triggersCount, 2)
         XCTAssertEqual(subscriber1?.callsCount, nil)
         XCTAssertEqual(subscriber2?.callsCount, 2)
     }
     
     func testAutoRemoveDeallocatedSubscribersAfterSubscribe() {
-        // Controller1 subscribes to the sharedEvent during init()
-        var subscriber1: Controller1? = Controller1() // a check is made for deallocated subscribers
-        // Controller2 subscribes to the sharedEvent during init()
-        var subscriber2: Controller2? = Controller2() // a check is made for deallocated subscribers
+        // ControllerTS1 subscribes to the sharedEventTS during init()
+        var subscriber1: ControllerTS1? = ControllerTS1() // a check is made for deallocated subscribers
+        // ControllerTS2 subscribes to the sharedEventTS during init()
+        var subscriber2: ControllerTS2? = ControllerTS2() // a check is made for deallocated subscribers
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 0)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.triggersCount, 0)
         
         subscriber1 = nil
         
-        // Controller3 subscribes to the sharedEvent during init()
-        var subscriber3: Controller3? = Controller3() // a check is made for deallocated subscribers
+        // ControllerTS3 subscribes to the sharedEventTS during init()
+        var subscriberTS3: ControllerTS3? = ControllerTS3() // a check is made for deallocated subscribers
         
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 0)
+        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
+        XCTAssertEqual(EventService.get.sharedEventTS.triggersCount, 0)
     }
     
     func testPerformance() {
