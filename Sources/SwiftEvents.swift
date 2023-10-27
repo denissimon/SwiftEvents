@@ -49,7 +49,6 @@ final public class Event<T> {
     /// - Parameter queue: The queue in which the handler should be executed when the Event triggers
     /// - Parameter handler: The closure you want executed when the Event triggers
     public func subscribe<O: AnyObject>(_ target: O, queue: DispatchQueue? = nil, handler: @escaping (T) -> ()) {
-        if !subscribers.isEmpty { checkDeallocated() }
         let subscriber = Subscriber(target: target, queue: queue, handler: handler)
         subscribers.append(subscriber)
     }
@@ -92,14 +91,6 @@ final public class Event<T> {
     
     public func unsubscribeAll() {
         subscribers.removeAll()
-    }
-    
-    private func checkDeallocated() {
-        for subscriber in subscribers {
-            if subscriber.target == nil {
-                unsubscribe(id: subscriber.id)
-            }
-        }
     }
 }
 
@@ -192,7 +183,6 @@ final public class EventTS<T> {
     /// - Parameter queue: The queue in which the handler should be executed when the Event triggers
     /// - Parameter handler: The closure you want executed when the Event triggers
     public func subscribe<O: AnyObject>(_ target: O, queue: DispatchQueue? = nil, handler: @escaping (T) -> ()) {
-        if !subscribers.isEmpty { checkDeallocated() }
         let subscriber = Subscriber(target: target, queue: queue, handler: handler)
         serialQueue.sync {
             self.subscribers.append(subscriber)
@@ -249,27 +239,14 @@ final public class EventTS<T> {
     }
     
     private func getSubscribers() -> [Subscriber<T>] {
-        var result = [Subscriber<T>]()
         serialQueue.sync {
-            result = subscribers
+            self.subscribers
         }
-        return result
     }
     
     private func getTriggersCount() -> Int {
-        var result = Int()
         serialQueue.sync {
-            result = _triggersCount
-        }
-        return result
-    }
-    
-    private func checkDeallocated() {
-        let subscribers = getSubscribers()
-        for subscriber in subscribers {
-            if subscriber.target == nil {
-                unsubscribe(id: subscriber.id)
-            }
+            self._triggersCount
         }
     }
 }
@@ -280,11 +257,9 @@ final public class ObservableTS<T> {
     
     public var value: T {
         get {
-            var value = _value
             didChanged.serialQueue.sync {
-                value = self._value
+                self._value
             }
-            return value
         }
         set {
             didChanged.serialQueue.sync {
@@ -332,3 +307,4 @@ public func <<< <T> (left: ObservableTS<T>, right: @autoclosure () -> T) {
 
 extension EventTS: Unsubscribable {}
 extension ObservableTS: Unbindable {}
+

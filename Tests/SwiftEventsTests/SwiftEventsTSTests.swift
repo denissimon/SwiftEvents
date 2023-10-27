@@ -14,10 +14,15 @@ import Dispatch
 
 class SwiftEventsTSTests: XCTestCase {
     
+    struct Some {}
+    
     var eventInt: EventTS<Int?> = EventTS()
     var eventString: EventTS<String?> = EventTS()
     var eventMultiValues: EventTS<(Int, String)?> = EventTS()
+    var eventSome: EventTS<Some> = EventTS()
+    
     var observableString: ObservableTS<String> = ObservableTS("")
+    var observableSome: ObservableTS<Some> = ObservableTS(Some())
     
     override func setUp() {
         super.setUp()
@@ -25,7 +30,10 @@ class SwiftEventsTSTests: XCTestCase {
         eventInt = EventTS()
         eventString = EventTS()
         eventMultiValues = EventTS()
+        eventSome = EventTS()
+        
         observableString = ObservableTS("")
+        observableSome = ObservableTS(Some())
         
         EventService.get.sharedEventTS.unsubscribeAll()
     }
@@ -519,36 +527,21 @@ class SwiftEventsTSTests: XCTestCase {
         XCTAssertEqual(subscriber2?.callsCount, 2)
     }
     
-    func testAutoRemoveDeallocatedSubscribersAfterSubscribe() {
-        // ControllerTS1 subscribes to the sharedEventTS during init()
-        var subscriber1: ControllerTS1? = ControllerTS1() // a check is made for deallocated subscribers
-        // ControllerTS2 subscribes to the sharedEventTS during init()
-        var subscriber2: ControllerTS2? = ControllerTS2() // a check is made for deallocated subscribers
-        
-        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEventTS.triggersCount, 0)
-        
-        subscriber1 = nil
-        
-        // ControllerTS3 subscribes to the sharedEventTS during init()
-        var subscriberTS3: ControllerTS3? = ControllerTS3() // a check is made for deallocated subscribers
-        
-        XCTAssertEqual(EventService.get.sharedEventTS.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEventTS.triggersCount, 0)
-    }
-    
     func testPerformance() {
         self.measure() {
             var callsCount = 0
+            
             for _ in 0..<10 {
                 eventMultiValues.subscribe(self) { data in
                     guard let data = data else { return }
                     callsCount += data.0
                 }
             }
+            
             for _ in 0..<1000 {
                 eventMultiValues.trigger((1, "test"))
             }
+            
             XCTAssertEqual(callsCount, 10000)
         }
     }

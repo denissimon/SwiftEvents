@@ -519,36 +519,21 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(subscriber2?.callsCount, 2)
     }
     
-    func testAutoRemoveDeallocatedSubscribersAfterSubscribe() {
-        // Controller1 subscribes to the sharedEvent during init()
-        var subscriber1: Controller1? = Controller1() // a check is made for deallocated subscribers
-        // Controller2 subscribes to the sharedEvent during init()
-        var subscriber2: Controller2? = Controller2() // a check is made for deallocated subscribers
-        
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 0)
-        
-        subscriber1 = nil
-        
-        // Controller3 subscribes to the sharedEvent during init()
-        var subscriber3: Controller3? = Controller3() // a check is made for deallocated subscribers
-        
-        XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
-        XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 0)
-    }
-    
     func testPerformance() {
         self.measure() {
             var callsCount = 0
+            
             for _ in 0..<10 {
                 eventMultiValues.subscribe(self) { data in
                     guard let data = data else { return }
                     callsCount += data.0
                 }
             }
+            
             for _ in 0..<1000 {
                 eventMultiValues.trigger((1, "test"))
             }
+            
             XCTAssertEqual(callsCount, 10000)
         }
     }
