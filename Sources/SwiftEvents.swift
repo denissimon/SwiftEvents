@@ -41,7 +41,7 @@ final public class Event<T> {
     public var subscribersCount: Int { subscribers.count }
     
     /// The number of times the Event was triggered
-    public var triggersCount = Int()
+    private(set) public var triggersCount = Int()
     
     public init() {}
     
@@ -332,4 +332,3 @@ public func <<< <T> (left: ObservableTS<T>, right: @autoclosure () -> T) {
 
 extension EventTS: Unsubscribable {}
 extension ObservableTS: Unbindable {}
-
