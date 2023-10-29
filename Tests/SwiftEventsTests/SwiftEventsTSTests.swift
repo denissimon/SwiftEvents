@@ -545,4 +545,80 @@ class SwiftEventsTSTests: XCTestCase {
             XCTAssertEqual(callsCount, 10000)
         }
     }
+    
+    func testThreadSafety() {
+        eventSome.subscribe(self) { _ in }
+        observableSome.bind(self) { _ in }
+        
+        DispatchQueue.concurrentPerform(iterations: 100_000) { _ in
+            eventSome.trigger(Some())
+            observableSome <<< Some()
+        }
+        
+        XCTAssertEqual(eventSome.triggersCount, 100_000)
+        XCTAssertEqual(observableSome.triggersCount, 100_000)
+    }
+    
+    func testThreadSafety2() {
+        DispatchQueue.concurrentPerform(iterations: 100_000) { _ in
+            eventSome.subscribe(self) { _ in }
+            observableSome.bind(self) { _ in }
+        }
+        
+        XCTAssertEqual(eventSome.subscribersCount, 100_000)
+        XCTAssertEqual(observableSome.observersCount, 100_000)
+    }
+        
+    func testThreadSafety3() {
+        
+        class ViewController {}
+        
+        // One target object as observer
+        let observer = ViewController()
+        
+        DispatchQueue.concurrentPerform(iterations: 100_000) { _ in
+            observableSome.bind(observer) { _ in }
+        }
+        
+        XCTAssertEqual(observableSome.observersCount, 100_000)
+        
+        // Because the target observer object is the same here,
+        // then this line will be equivalent to calling unbindAll()
+        observableSome.unbind(observer)
+        
+        XCTAssertEqual(observableSome.observersCount, 0)
+    }
+    
+    func testThreadSafety4() {
+        
+        class TestClass {}
+        
+        // Various target objects as observers
+        var observers = [TestClass]()
+        
+        let stateLock = NSLock()
+        
+        DispatchQueue.concurrentPerform(iterations: 10000) { _ in
+            let observer = TestClass()
+            observableSome.bind(observer) { _ in }
+            
+            stateLock.lock()
+            observers.append(observer)
+            stateLock.unlock()
+        }
+        
+        XCTAssertEqual(observableSome.observersCount, 10000)
+        
+        DispatchQueue.concurrentPerform(iterations: 100) { _ in
+            if let randomObserver = observers.randomElement() {
+                observableSome.unbind(randomObserver)
+                
+                stateLock.lock()
+                observers = observers.filter { $0 !== randomObserver }
+                stateLock.unlock()
+            }
+        }
+        
+        XCTAssertEqual(observableSome.observersCount, 9900)
+    }
 }
