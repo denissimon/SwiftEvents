@@ -143,7 +143,7 @@ Event and Observable classes conform to `Unsubscribable` and `Unbindable` protoc
 
 More usage examples can be found in this [demo app](https://github.com/denissimon/ImageSearch). 
 
-Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/EventService.swift) contains a NotificationCenter-like implementation.
+Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/EventService.swift) contains a NotificationCenter-like implementation, and here is a [gist](https://gist.github.com/denissimon/3b8c5a02ad2ce5f290f3fbecdbfb2fda) with cell-to-cellViewModel data binding example.
 
 ### Advanced features
 
