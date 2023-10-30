@@ -24,7 +24,7 @@ Installation
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 1.3.0'
+pod 'SwiftEvents', '~> 2.0'
 ```
 
 #### Carthage
@@ -41,7 +41,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "1.3.0")
+    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "2.0")
 ]
 ```
 
