@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
   s.name         = 'SwiftEvents'
-  s.version      = '2.0.0'
+  s.version      = '2.0.1'
   s.homepage     = 'https://github.com/denissimon/SwiftEvents'
   s.authors      = { 'Denis Simon' => 'denis.v.simon@gmail.com' }
-  s.summary      = 'A thread-safe library for creating and observing events. Includes Event<T> for notifications and Observable<T> for data binding.'
+  s.summary      = 'A thread-safe library for data binding and notifications based on events. Includes Event<T> and Observable<T>.'
   s.license      = { :type => 'MIT' }
 
   s.swift_versions = ['5']
