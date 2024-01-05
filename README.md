@@ -182,7 +182,7 @@ someObservable.triggersCount
 
 #### queue: DispatchQueue
 
-By default, the provided handler is executed on the thread that triggers the Event / Observable. To change this default behaviour:
+By default, the provided handler is executed on the thread that triggers the Event/Observable. To change this default behaviour:
 
 ```swift
 // This executes the handler on the main queue
