@@ -4,15 +4,15 @@ SwiftEvents
 [![Swift](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
-SwiftEvents is a lightweight library for creating and observing events.
+SwiftEvents is a lightweight library to write simple and elegant data binding and notifications code without overcomplicated dependencies.
 
 It includes:
-* `Observable<T>` for data binding that can be particularly used in MVVM. Implemented using the Event class.
-* `Event<T>` for any pub/sub notifications, including one-to-many with multiple subsribers.
+* `Observable<T>` - a type-safe class for data binding that can be particularly used in MVVM. Implemented using the Event class.
+* `Event<T>` - a type-safe class for any notifications, including one-to-many with multiple subsribers.
 
-SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, its properties and methods can be safely called by multiple threads at the same time.
+SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, all its properties and methods can be safely accessed by multiple threads at the same time.
 
-Another important feature is the automatic removal of subscribers/observers when they are deallocated.
+Another important feature is the automatic removal of subscribers/observers from Event/Observable when they are deallocated.
 
 Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests) coverage.
 
@@ -47,7 +47,7 @@ dependencies: [
 
 #### Manually
 
-Copy `SwiftEvents.swift` into your project.
+Add `SwiftEvents.swift` to your project.
 
 Usage
 -----
@@ -141,7 +141,7 @@ Event and Observable classes conform to `Unsubscribable` and `Unbindable` protoc
 
 ### More examples
 
-More usage examples can be found in this [demo app](https://github.com/denissimon/ImageSearch). 
+More usage examples can be found in [iOS-MVVM-Clean-Architecture](https://github.com/denissimon/iOS-MVVM-Clean-Architecture) demo app.
 
 Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/EventService.swift) contains a NotificationCenter-like implementation, and here is a [gist](https://gist.github.com/denissimon/3b8c5a02ad2ce5f290f3fbecdbfb2fda) with cell-to-cellViewModel data binding example.
 
