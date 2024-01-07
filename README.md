@@ -12,7 +12,7 @@ It includes:
 
 SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, its properties and methods can be safely accessed by multiple threads at the same time.
 
-Another important feature is the automatic unsubscription of subscribers / observers when they are deallocated.
+Another important feature is the automatic unsubscription of subscribers/observers when they are deallocated.
 
 Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests) coverage.
 
@@ -133,7 +133,7 @@ class MyViewController: UIViewController {
 
 You can also create several events (didDownload, onNetworkError etc), and trigger only what is needed.
 
-Event and Observable classes conform to `Unsubscribable` and `Unbindable` protocols respectively, which allows to pass a reference to an object that should only call `unsubscribe` / `unbind`.
+Event and Observable conform to `Unsubscribable` and `Unbindable` protocols respectively, which allows to pass a reference to an object that should only call `unsubscribe` / `unbind`.
 
 ### More examples
 
@@ -145,7 +145,7 @@ Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEv
 
 #### Removal of a subscriber / observer
 
-SwiftEvents automatically removes subscribers / observers when they are deallocated. But they also can be removed manually:
+Deallocated subscribers/observers are automatically removed from the Event/Observable. But they also can be removed manually:
 
 ```swift
 someEvent.subscribe(self) { [weak self] in self?.setValue($0) }
@@ -178,7 +178,7 @@ someObservable.triggersCount
 
 #### queue: DispatchQueue
 
-By default, the provided handler is executed on the thread that triggers the Event / Observable. To change this default behaviour:
+By default, the provided handler is executed on the thread that triggers the Event/Observable. To change this default behaviour:
 
 ```swift
 // This executes the handler on the main queue
