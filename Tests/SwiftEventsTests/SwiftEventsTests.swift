@@ -92,7 +92,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(observableString.value, "value2")
     }
     
-    func testSubscribeAndTrigger() {
+    func testSubscribeAndNotify() {
         var intEventResult: Int? = nil
         var stringEventResult: String? = nil
         var multiValueResult: (Int, String)? = nil
@@ -101,9 +101,9 @@ class SwiftEventsTests: XCTestCase {
         eventString.subscribe(self) { data in stringEventResult = data }
         eventMultiValues.subscribe(self) { data in multiValueResult = data }
         
-        eventInt.trigger(1)
-        eventString.trigger("test")
-        eventMultiValues.trigger((1, "test"))
+        eventInt.notify(1)
+        eventString.notify("test")
+        eventMultiValues.notify((1, "test"))
         
         XCTAssertEqual(intEventResult, 1)
         XCTAssertEqual(stringEventResult, "test")
@@ -111,24 +111,24 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(multiValueResult?.1, "test")
     }
     
-    func testSubscribeAndTriggerNil() {
+    func testSubscribeAndNotifyNil() {
         var intEventResult: Int? = nil
         
         eventInt.subscribe(self) { data in intEventResult = data }
         
-        eventInt.trigger(nil)
+        eventInt.notify(nil)
         
         XCTAssertEqual(intEventResult, nil)
         XCTAssertEqual(eventInt.triggersCount, 1)
     }
     
-    func testSubscribeAndMultiTrigger() {
+    func testSubscribeAndMultiNotify() {
         var intEventResult: Int? = nil
         
         eventInt.subscribe(self) { data in intEventResult = data }
         
-        eventInt.trigger(1)
-        eventInt.trigger(5)
+        eventInt.notify(1)
+        eventInt.notify(5)
         
         XCTAssertEqual(intEventResult, 5)
         XCTAssertEqual(eventInt.triggersCount, 2)
@@ -150,7 +150,7 @@ class SwiftEventsTests: XCTestCase {
             callsCount += 1
         }
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(intEventResult, 2)
         XCTAssertEqual(callsCount, 2)
@@ -172,7 +172,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(eventInt.subscribersCount, 2)
         
         eventInt.unsubscribe(self)
-        eventInt.trigger(1)
+        eventInt.notify(1)
         
         XCTAssertEqual(eventInt.subscribersCount, 0)
         XCTAssertEqual(eventInt.triggersCount, 1)
@@ -186,7 +186,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
         
         EventService.get.sharedEvent.unsubscribe(subscriber1)
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 1)
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount, 1)
@@ -204,7 +204,7 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(eventInt.subscribersCount, 1)
         
-        eventInt.trigger(1)
+        eventInt.notify(1)
 
         XCTAssertEqual(eventInt.subscribersCount, 0)
         XCTAssertEqual(eventInt.triggersCount, 1)
@@ -227,7 +227,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(eventInt.subscribersCount, 1)
         
         for _ in 1...n*2 {
-            eventInt.trigger(1)
+            eventInt.notify(1)
         }
         
         XCTAssertEqual(eventInt.subscribersCount, 0)
@@ -251,7 +251,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(eventInt.subscribersCount, 2)
         
         eventInt.unsubscribeAll()
-        eventInt.trigger(1)
+        eventInt.notify(1)
         
         XCTAssertEqual(eventInt.subscribersCount, 0)
         XCTAssertEqual(eventInt.triggersCount, 1)
@@ -265,7 +265,7 @@ class SwiftEventsTests: XCTestCase {
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
         
         EventService.get.sharedEvent.unsubscribeAll()
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount, 0)
@@ -287,7 +287,7 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(eventInt.subscribersCount, 2)
         
-        eventInt.trigger(1)
+        eventInt.notify(1)
 
         XCTAssertEqual(eventInt.subscribersCount, 0)
         XCTAssertEqual(eventInt.triggersCount, 1)
@@ -301,12 +301,12 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 3)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount + subscriber3.callsCount, 3)
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
         XCTAssertEqual(subscriber1.callsCount, 2)
@@ -321,12 +321,12 @@ class SwiftEventsTests: XCTestCase {
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 3)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(subscriber1.callsCount + subscriber2.callsCount + subscriber4.callsCount, 3)
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
         
-        EventService.get.sharedEvent.trigger(1)
+        EventService.get.sharedEvent.notify(1)
         
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 0)
         XCTAssertEqual(subscriber1.callsCount, 1)
@@ -346,22 +346,22 @@ class SwiftEventsTests: XCTestCase {
         eventInt.subscribe(self) { _ in }
         
         for _ in 0...2 {
-            eventInt.trigger(1)
+            eventInt.notify(1)
         }
         
         XCTAssertEqual(eventInt.subscribersCount, 1)
         XCTAssertEqual(eventInt.triggersCount, 3)
     }
     
-    func testTriggerFromDifferentThreads() {
+    func testNotifyFromDifferentThreads() {
         let subscriber = Controller1()
         
-        // Trigger from the main thread
-        EventService.get.sharedEvent.trigger(1)
+        // Notify from the main thread
+        EventService.get.sharedEvent.notify(1)
         
         DispatchQueue.global(qos: .background).sync {
-            // Trigger from a background thread
-            EventService.get.sharedEvent.trigger(1)
+            // Notify from a background thread
+            EventService.get.sharedEvent.notify(1)
         }
         
         XCTAssertEqual(subscriber.callsCount, 2)
@@ -394,8 +394,8 @@ class SwiftEventsTests: XCTestCase {
             }
         }
         
-        eventInt.trigger(1)
-        eventInt.trigger(1)
+        eventInt.notify(1)
+        eventInt.notify(1)
         
         XCTAssertEqual(eventInt.subscribersCount, 1)
         XCTAssertEqual(eventInt.triggersCount, 2)
@@ -425,7 +425,7 @@ class SwiftEventsTests: XCTestCase {
             }
         }
         
-        eventInt.trigger(1)
+        eventInt.notify(1)
         wait(for: [promise], timeout: 1)
     }
     
@@ -452,7 +452,7 @@ class SwiftEventsTests: XCTestCase {
             }
         }
         
-        eventInt.trigger(1)
+        eventInt.notify(1)
         wait(for: [promise], timeout: 1)
     }
     
@@ -473,7 +473,7 @@ class SwiftEventsTests: XCTestCase {
             callsCount += data
         }
         
-        eventInt.trigger(1)
+        eventInt.notify(1)
         
         queue.sync {}
         
@@ -493,18 +493,18 @@ class SwiftEventsTests: XCTestCase {
             }
         }
         
-        eventInt.trigger(1)
+        eventInt.notify(1)
         wait(for: [promise], timeout: 1)
         XCTAssertEqual(callsCount, 1)
     }
     
-    func testAutoRemoveDeallocatedSubscribersAfterTrigger() {
+    func testAutoRemoveDeallocatedSubscribersAfterNotify() {
         // Controller1 subscribes to the sharedEvent during init()
         var subscriber1: Controller1? = Controller1()
         // Controller2 subscribes to the sharedEvent during init()
         var subscriber2: Controller2? = Controller2()
         
-        EventService.get.sharedEvent.trigger(1) // a check is made for deallocated subscribers
+        EventService.get.sharedEvent.notify(1) // a check is made for deallocated subscribers
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
         XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 1)
         XCTAssertEqual(subscriber1?.callsCount, 1)
@@ -512,7 +512,7 @@ class SwiftEventsTests: XCTestCase {
         
         subscriber1 = nil
         
-        EventService.get.sharedEvent.trigger(1) // a check is made for deallocated subscribers
+        EventService.get.sharedEvent.notify(1) // a check is made for deallocated subscribers
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 1)
         XCTAssertEqual(EventService.get.sharedEvent.triggersCount, 2)
         XCTAssertEqual(subscriber1?.callsCount, nil)
@@ -531,7 +531,7 @@ class SwiftEventsTests: XCTestCase {
             }
             
             for _ in 0..<1000 {
-                eventMultiValues.trigger((1, "test"))
+                eventMultiValues.notify((1, "test"))
             }
             
             XCTAssertEqual(callsCount, 10000)
