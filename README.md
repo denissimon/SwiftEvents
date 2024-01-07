@@ -4,15 +4,15 @@ SwiftEvents
 [![Swift](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
-SwiftEvents is a lightweight library to write simple and elegant data binding and notifications code without overcomplicated dependencies.
+SwiftEvents is a lightweight library for creating and observing events.
 
 It includes:
-* `Observable<T>` - a type-safe class for data binding that can be particularly used in MVVM. Implemented using the Event class.
+* `Observable<T>` - a type-safe class for data binding that can be particularly used in MVVM.
 * `Event<T>` - a type-safe class for any notifications, including one-to-many with multiple subsribers.
 
-SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, all its properties and methods can be safely accessed by multiple threads at the same time.
+SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, its properties and methods can be safely accessed by multiple threads at the same time.
 
-Another important feature is the automatic removal of subscribers/observers from Event/Observable when they are deallocated.
+Another important feature is the automatic unsubscription of subscribers / observers when they are deallocated.
 
 Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests) coverage.
 
@@ -24,7 +24,7 @@ Installation
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 2.0'
+pod 'SwiftEvents', '~> 2.1'
 ```
 
 #### Carthage
@@ -41,7 +41,7 @@ To install SwiftEvents using the [Swift Package Manager](https://swift.org/packa
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "2.0")
+    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "2.1")
 ]
 ```
 
@@ -77,33 +77,29 @@ class View: UIViewController {
 
     private func bind() {
         viewModel.items.bind(self) { [weak self] _ in self?.updateItems() }
-        viewModel.infoLabel.bind(self) { [weak self] value in self?.updateInfoLabel(value) }
+        viewModel.infoLabel.bind(self) { [weak self] in self?.updateInfoLabel($0) }
     }
 
-    private func updateItems() {
-        refreshUI()
-    }
+    private func updateItems() { ... }
 
-    private func updateInfoLabel(_ value: String) {
-        infoLabel.text = value
+    private func updateInfoLabel(_ newText: String) {
+        infoLabel.text = newText
     }
 }
 ```
 
 In this example, every time the ViewModel changes the value of the observable property `items` or `infoLabel`, the View is notified and updates its UI.
 
-As with Event, an Observable can have multiple observers.
-
 The infix operator <<< can be used to set a new value for an observable property:
 
 ```swift
-infoLabel.value = newValue
-infoLabel <<< newValue
+items.value = newData
+items <<< newData
 ```
 
 ### Event
 
-An example implementation of the closure-based delegation pattern:
+Example implementation of the closure-based delegation pattern:
 
 ```swift
 class MyModel {
@@ -112,7 +108,7 @@ class MyModel {
     
     func downloadImage(for url: URL) {
         service.download(url: url) { [weak self] image in
-            self?.didDownload.trigger(image)
+            self?.didDownload.notify(image)
         }
     }
 }
@@ -149,7 +145,7 @@ Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEv
 
 #### Removal of a subscriber / observer
 
-SwiftEvents automatically removes subscribers/observers when they are deallocated. But they also can be removed manually:
+SwiftEvents automatically removes subscribers / observers when they are deallocated. But they also can be removed manually:
 
 ```swift
 someEvent.subscribe(self) { [weak self] in self?.setValue($0) }
@@ -182,12 +178,12 @@ someObservable.triggersCount
 
 #### queue: DispatchQueue
 
-By default, the provided handler is executed on the thread that triggers the Event/Observable. To change this default behaviour:
+By default, the provided handler is executed on the thread that triggers the Event / Observable. To change this default behaviour:
 
 ```swift
 // This executes the handler on the main queue
-someEvent.subscribe(self, queue: .main) { [weak self] in self?.updateImage($0) }
-someObservable.bind(self, queue: .main) { [weak self] in self?.updateImage($0) }
+someEvent.subscribe(self, queue: .main) { [weak self] in self?.updateTable($0) }
+someObservable.bind(self, queue: .main) { [weak self] in self?.updateTable($0) }
 ```
 
 #### One-time notification
