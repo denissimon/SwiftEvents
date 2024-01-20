@@ -19,6 +19,15 @@ Comprehensive [unit test](https://github.com/denissimon/SwiftEvents/blob/master/
 Installation
 ------------
 
+#### Swift Package Manager
+
+To install SwiftEvents using the [Swift Package Manager](https://swift.org/package-manager):
+
+```txt
+Xcode: File -> Add Packages
+Enter Package URL: https://github.com/denissimon/SwiftEvents
+```
+
 #### CocoaPods
 
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
@@ -31,23 +40,13 @@ pod 'SwiftEvents', '~> 2.1'
 
 To install SwiftEvents using [Carthage](https://github.com/Carthage/Carthage), add this line to your `Cartfile`:
 
-```
+```ruby
 github "denissimon/SwiftEvents"
-```
-
-#### Swift Package Manager
-
-To install SwiftEvents using the [Swift Package Manager](https://swift.org/package-manager), add it to your `Package.swift` file:
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/denissimon/SwiftEvents.git", from: "2.1")
-]
 ```
 
 #### Manually
 
-Add `SwiftEvents.swift` to your project.
+Copy `SwiftEvents.swift` into your project.
 
 Usage
 -----
@@ -137,7 +136,7 @@ Event and Observable conform to `Unsubscribable` and `Unbindable` protocols resp
 
 ### More examples
 
-More usage examples can be found in [iOS-MVVM-Clean-Architecture](https://github.com/denissimon/iOS-MVVM-Clean-Architecture) demo app.
+More usage examples can be found in [iOS-MVVM-Clean-Architecture](https://github.com/denissimon/iOS-MVVM-Clean-Architecture).
 
 Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/EventService.swift) contains a NotificationCenter-like implementation, and here is a [gist](https://gist.github.com/denissimon/3b8c5a02ad2ce5f290f3fbecdbfb2fda) with a cell-to-cellViewModel binding example.
 
@@ -145,7 +144,7 @@ Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEv
 
 #### Removal of a subscriber / observer
 
-Deallocated subscribers/observers are automatically removed from the Event/Observable. But they also can be removed manually:
+Deallocated subscribers/observers are automatically removed from Event/Observable. But they also can be removed manually:
 
 ```swift
 someEvent.subscribe(self) { [weak self] in self?.setValue($0) }
@@ -181,7 +180,7 @@ someObservable.triggersCount
 By default, the provided handler is executed on the thread that triggers the Event/Observable. To change this default behaviour:
 
 ```swift
-// This executes the handler on the main queue
+// This executes the handler on the main thread
 someEvent.subscribe(self, queue: .main) { [weak self] in self?.updateTable($0) }
 someObservable.bind(self, queue: .main) { [weak self] in self?.updateTable($0) }
 ```
