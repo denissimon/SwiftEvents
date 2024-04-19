@@ -3,7 +3,8 @@
 //  https://github.com/denissimon/SwiftEvents
 //
 //  Created by Denis Simon on 02/07/2020.
-//  Copyright © 2020 SwiftEvents. All rights reserved.
+//
+//  MIT License (https://github.com/denissimon/SwiftEvents/blob/master/LICENSE)
 //
 
 import SwiftEvents

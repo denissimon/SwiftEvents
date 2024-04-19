@@ -3,7 +3,8 @@
 //  https://github.com/denissimon/SwiftEvents
 //
 //  Created by Denis Simon on 05/29/2019.
-//  Copyright © 2019 SwiftEvents. All rights reserved.
+//
+//  MIT License (https://github.com/denissimon/SwiftEvents/blob/master/LICENSE)
 //
 
 import XCTest
@@ -502,7 +503,7 @@ class SwiftEventsTests: XCTestCase {
         // Controller1 subscribes to the sharedEvent during init()
         var subscriber1: Controller1? = Controller1()
         // Controller2 subscribes to the sharedEvent during init()
-        var subscriber2: Controller2? = Controller2()
+        let subscriber2: Controller2? = Controller2()
         
         EventService.get.sharedEvent.notify(1) // a check is made for deallocated subscribers
         XCTAssertEqual(EventService.get.sharedEvent.subscribersCount, 2)
