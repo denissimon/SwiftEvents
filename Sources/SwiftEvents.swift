@@ -22,7 +22,7 @@ protocol Unbindable: AnyObject {
 
 final public class Event<T> {
     
-    struct Subscriber<T>: Identifiable {
+    struct Subscriber: Identifiable {
         weak var target: AnyObject?
         let queue: DispatchQueue?
         let handler: (T) -> ()
@@ -36,7 +36,7 @@ final public class Event<T> {
         }
     }
     
-    private var subscribers = [Subscriber<T>]()
+    private var subscribers = [Subscriber]()
     
     /// The number of subscribers to the Event
     public var subscribersCount: Int { subscribers.count }
@@ -148,7 +148,7 @@ extension Observable: Unbindable {}
 
 final public class EventTS<T> {
     
-    struct Subscriber<T>: Identifiable {
+    struct Subscriber: Identifiable {
         weak var target: AnyObject?
         let queue: DispatchQueue?
         let handler: (T) -> ()
@@ -162,7 +162,7 @@ final public class EventTS<T> {
         }
     }
     
-    private var subscribers = [Subscriber<T>]()
+    private var subscribers = [Subscriber]()
     
     fileprivate let serialQueue = DispatchQueue(label: "com.swift.events.dispatch.queue")
     
@@ -239,7 +239,7 @@ final public class EventTS<T> {
         }
     }
     
-    private func getSubscribers() -> [Subscriber<T>] {
+    private func getSubscribers() -> [Subscriber] {
         serialQueue.sync {
             self.subscribers
         }
