@@ -7,10 +7,10 @@ Pod::Spec.new do |s|
   s.license      = { :type => 'MIT' }
 
   s.swift_versions = ['5']
-  s.ios.deployment_target = "9.0"
-  s.osx.deployment_target = "10.10"
-  s.watchos.deployment_target = "3.0"
-  s.tvos.deployment_target = "10.0"
+  s.ios.deployment_target = "12.0"
+  s.osx.deployment_target = "10.13"
+  s.watchos.deployment_target = "4.0"
+  s.tvos.deployment_target = "12.0"
   s.source       =  { :git => 'https://github.com/denissimon/SwiftEvents.git', :tag => s.version.to_s }
   s.source_files = 'Sources/**/*.swift'
   s.frameworks  = "Foundation"
