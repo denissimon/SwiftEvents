@@ -160,14 +160,14 @@ someEvent.unsubscribeAll()
 someObservable.unbindAll()
 ```
 
-#### The number of subscribers / observers
+#### Number of subscribers / observers
 
 ```swift
 someEvent.subscribersCount
 someObservable.observersCount
 ```
 
-#### The number of triggers
+#### Number of triggers
 
 ```swift
 someEvent.triggersCount
@@ -176,7 +176,7 @@ someObservable.triggersCount
 
 #### queue: DispatchQueue
 
-By default, the provided handler is executed on the thread that triggers the Event/Observable. To change this default behaviour:
+By default, a provided handler is executed on the thread that triggers the Event/Observable. To change this default behaviour:
 
 ```swift
 // This executes the handler on the main thread
@@ -196,7 +196,7 @@ someEvent.subscribe(self) { [weak self] data in
 }
 ```
 
-#### N-time notifications
+#### N-time notification
 
 To ensure that the handler will be executed no more than `n` times:
 
