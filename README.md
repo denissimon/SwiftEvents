@@ -8,7 +8,7 @@ SwiftEvents is a lightweight library for creating and observing events.
 
 It includes:
 * `Observable<T>` - a type-safe class for data binding that can be particularly used in MVVM.
-* `Event<T>` - a type-safe class for any notifications, including one-to-many with multiple subsribers.
+* `Event<T>` - a type-safe class for any notifications, including with multiple subscribers.
 
 SwiftEvents has a thread-safe version - `EventTS<T>` and `ObservableTS<T>` classes. This way, its properties and methods can be safely accessed by multiple threads at the same time.
 
@@ -57,17 +57,19 @@ Example:
 
 ```swift
 class ViewModel {
-    let items: Observable<[SomeItem]> = Observable([])
+    let items: Observable<[Item]> = Observable([])
     let infoLabel: Observable<String> = Observable("")
+    ...
 }
 ```
 
 ```swift
-class View: UIViewController {
-    
-    var viewModel = ViewModel()
+class ViewController: UIViewController {
 
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var infoLabel: UILabel!
+
+    private var viewModel = ViewModel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,25 +77,25 @@ class View: UIViewController {
     }
 
     private func bind() {
-        viewModel.items.bind(self) { [weak self] _ in self?.updateItems() }
+        viewModel.items.bind(self) { [weak self] _ in self?.refreshTable() }
         viewModel.infoLabel.bind(self) { [weak self] in self?.updateInfoLabel($0) }
     }
 
-    private func updateItems() { ... }
+    private func refreshTable() { ... }
 
-    private func updateInfoLabel(_ newText: String) {
-        infoLabel.text = newText
+    private func updateInfoLabel(_ text: String) {
+        infoLabel.text = text
     }
 }
 ```
 
-In this example, every time the ViewModel changes the value of the observable property `items` or `infoLabel`, the View is notified and updates its UI.
+In this example, every time the ViewModel changes the value of the observable property `items` or `infoLabel`, the ViewController is notified and updates its UI.
 
-The infix operator <<< can be used to set a new value for an observable property:
+The `<<<` infix operator can be used to set a new value for an observable property:
 
 ```swift
-items.value = newData
-items <<< newData
+items.value = newItems
+items <<< newItems
 ```
 
 ### Event
@@ -101,50 +103,47 @@ items <<< newData
 Example implementation of the closure-based delegation pattern:
 
 ```swift
-class MyModel {
+class ImageProcessingService {
     
-    let didDownload = Event<UIImage?>()
+    let didProcess = Event<Image?>()
     
-    func downloadImage(for url: URL) {
-        service.download(url: url) { [weak self] image in
-            self?.didDownload.notify(image)
-        }
+    func processImage(_ image: Image) {
+        /* time-consuming processing code */
+        didProcess.notify(newImage)
     }
 }
 ```
 
 ```swift
-class MyViewController: UIViewController {
+class ViewModel {
 
-    let model = MyModel()
-    var image: UIImage?
+    private let imageProcessingService: ImageProcessingService
+    var image: Image?
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        model.didDownload.subscribe(self) { [weak self] image in self?.updateImage(image) }
+    init(imageProcessingService: ImageProcessingService) {
+        self.imageProcessingService = imageProcessingService        
+        imageProcessingService.didProcess.subscribe(self) { [weak self] image in self?.updateImage(image) }
     }
     
-    private func updateImage(_ image: UIImage?) {
+    private func updateImage(_ image: Image?) {
         self.image = image
     }
 }
 ```
 
-You can also create several events (didDownload, onNetworkError etc), and trigger only what is needed.
+You can also create several events (didProcess, didDownload, onNetworkError etc.) and trigger only what is needed.
 
-Event and Observable conform to `Unsubscribable` and `Unbindable` protocols respectively, which allows to pass a reference to an object that should only call `unsubscribe` / `unbind`.
+The Event and Observable classes conform to `Unsubscribable` and `Unbindable` protocols respectively, which allows to pass a reference to an object that should only call `unsubscribe` / `unbind`.
 
 ### More examples
 
-More usage examples can be found in [iOS-MVVM-Clean-Architecture](https://github.com/denissimon/iOS-MVVM-Clean-Architecture).
-
-Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests/EventService.swift) contains a NotificationCenter-like implementation, and here is a [gist](https://gist.github.com/denissimon/3b8c5a02ad2ce5f290f3fbecdbfb2fda) with a cell-to-cellViewModel binding example.
+More usage examples can be found in [iOS-MVVM-Clean-Architecture](https://github.com/denissimon/iOS-MVVM-Clean-Architecture). Also [tests](https://github.com/denissimon/SwiftEvents/blob/master/Tests/SwiftEventsTests) contain additional examples including a NotificationCenter-like implementation where a shared event and multiple subscribers are used.
 
 ### Advanced features
 
-#### Removal of a subscriber / observer
+#### Removing a subscriber / observer
 
-Deallocated subscribers/observers are automatically removed from Event/Observable. But they also can be removed manually:
+Deallocated subscribers/observers are automatically removed from the Event/Observable, but they can also be removed manually:
 
 ```swift
 someEvent.subscribe(self) { [weak self] in self?.setValue($0) }
@@ -154,7 +153,7 @@ someObservable.bind(cell) { [weak cell] in cell?.update($0) }
 someObservable.unbind(cell)
 ```
 
-#### Removal of all subscribers / observers
+#### Removing all subscribers / observers
 
 ```swift
 someEvent.unsubscribeAll()
