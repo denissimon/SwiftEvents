@@ -33,7 +33,7 @@ Enter Package URL: https://github.com/denissimon/SwiftEvents
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 2.1'
+pod 'SwiftEvents', '~> 2.2'
 ```
 
 #### Carthage
