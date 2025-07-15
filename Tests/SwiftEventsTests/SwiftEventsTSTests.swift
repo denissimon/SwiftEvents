@@ -583,8 +583,7 @@ class SwiftEventsTSTests: XCTestCase {
         
         XCTAssertEqual(observableSome.observersCount, 100_000)
         
-        // Because the target observer object is the same here,
-        // then this line will be equivalent to calling unbindAll()
+        // Since the target observer object is the same here, this line will be equivalent to calling unbindAll()
         observableSome.unbind(observer)
         
         XCTAssertEqual(observableSome.observersCount, 0)
