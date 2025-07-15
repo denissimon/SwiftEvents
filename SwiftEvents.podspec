@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SwiftEvents'
-  s.version      = '2.2.3'
+  s.version      = '2.2.4'
   s.homepage     = 'https://github.com/denissimon/SwiftEvents'
   s.authors      = { 'Denis Simon' => 'denis.v.simon@gmail.com' }
   s.summary      = 'The easiest way to implement data binding and notifications. Includes Event<T> and Observable<T>. Has a thread-safe version.'
