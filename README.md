@@ -1,7 +1,7 @@
 SwiftEvents
 ===========
 
-[![Swift](https://img.shields.io/badge/Swift-5-orange.svg?style=flat)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-6-orange.svg?style=flat)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS%20%7C%20Linux-lightgrey.svg)](https://developer.apple.com/swift/)
 
 SwiftEvents is a lightweight library for creating and observing events.
@@ -33,7 +33,7 @@ Enter Package URL: https://github.com/denissimon/SwiftEvents
 To install SwiftEvents using [CocoaPods](https://cocoapods.org), add this line to your `Podfile`:
 
 ```ruby
-pod 'SwiftEvents', '~> 2.2'
+pod 'SwiftEvents', '~> 2.3'
 ```
 
 #### Carthage
