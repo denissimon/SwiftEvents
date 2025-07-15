@@ -117,16 +117,14 @@ class ImageProcessingService {
 ```swift
 class ViewModel {
 
-    private let imageProcessingService: ImageProcessingService
+    private let service: ImageProcessingService
     var image: Image?
-
-    init(imageProcessingService: ImageProcessingService) {
-        self.imageProcessingService = imageProcessingService        
-        imageProcessingService.didProcess.subscribe(self) { [weak self] image in self?.updateImage(image) }
-    }
     
-    private func updateImage(_ image: Image?) {
-        self.image = image
+    init(service: ImageProcessingService) {
+        self.service = service
+        self.service.didProcess.subscribe(self) { [weak self] image in 
+            self?.image = image
+        }
     }
 }
 ```
@@ -190,7 +188,7 @@ To ensure that the handler will be executed only once:
 
 ```swift
 someEvent.subscribe(self) { [weak self] data in
-    guard let self = self else { return }
+    guard let self else { return }
     self.useData(data)
     self.someEvent.unsubscribe(self)
 }
@@ -202,7 +200,7 @@ To ensure that the handler will be executed no more than `n` times:
 
 ```swift
 someEvent.subscribe(self) { [weak self] data in
-    guard let self = self else { return }
+    guard let self else { return }
     self.useData(data)
     if self.someEvent.triggersCount >= n { self.someEvent.unsubscribe(self) }
 }
