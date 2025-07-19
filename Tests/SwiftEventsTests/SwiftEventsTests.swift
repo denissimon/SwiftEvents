@@ -8,7 +8,7 @@
 //
 
 import XCTest
-import SwiftEvents
+@testable import SwiftEvents
 #if os(Linux)
 import Dispatch
 #endif
